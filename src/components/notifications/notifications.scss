@@ -1,0 +1,77 @@
+.notifications-bell {
+  --ai-color: var(--text-secondary);
+  --ai-hover: transparent;
+  border: 1px solid var(--border-default);
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background-color 160ms ease;
+
+  &:hover {
+    --ai-color: var(--text-primary);
+    border-color: var(--border-strong);
+    background: transparent;
+  }
+}
+
+.notifications-dropdown {
+  width: 320px;
+  background: var(--bg-surface);
+
+  &__header {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  &__mark-all {
+    --button-color: var(--text-secondary);
+    --button-hover-color: var(--accent-primary);
+    --button-hover: transparent;
+  }
+
+  &__item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    background: transparent;
+
+    &:hover {
+      background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+    }
+
+    &--unread {
+      background: color-mix(
+        in srgb,
+        var(--accent-primary-soft) 24%,
+        transparent
+      );
+    }
+  }
+
+  &__description {
+    color: var(--text-muted);
+  }
+
+  &__footer {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  &__view-all {
+    --button-color: var(--accent-primary-contrast);
+    --button-hover-color: var(--accent-primary-contrast);
+    background: linear-gradient(
+      135deg,
+      var(--accent-primary),
+      var(--accent-primary-hover)
+    );
+
+    &:hover {
+      background: linear-gradient(
+        135deg,
+        var(--accent-primary-hover),
+        var(--accent-primary-active)
+      );
+    }
+  }
+}

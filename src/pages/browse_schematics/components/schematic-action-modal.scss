@@ -1,0 +1,61 @@
+.schematic-action-modal {
+  &__content {
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+    box-shadow: 0 20px 44px color-mix(in srgb, var(--black) 42%, transparent);
+  }
+
+  &__body {
+    padding: 20px 18px;
+  }
+
+  &__icon-wrap {
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--danger) 46%, transparent);
+    color: var(--danger);
+  }
+
+  &__icon {
+    color: var(--danger);
+  }
+
+  &__title {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  &__text {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 36ch;
+  }
+
+  &__actions {
+    width: 100%;
+    margin-top: 4px;
+    gap: 8px;
+  }
+
+  &__button {
+    border-radius: 6px;
+
+    &--cancel {
+      --button-color: var(--text-secondary);
+      --button-hover-color: var(--text-secondary);
+      --button-hover: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+      border: 1px solid var(--border-default);
+    }
+
+    &--danger {
+      --button-color: var(--danger);
+      --button-hover-color: var(--danger);
+      --button-hover: color-mix(in srgb, var(--danger) 10%, transparent);
+      border: 1px solid var(--border-danger);
+    }
+  }
+}
