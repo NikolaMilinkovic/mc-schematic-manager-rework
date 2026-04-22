@@ -88,14 +88,16 @@ function Navbar({ items = defaultItems, onLogout }: NavbarProps) {
 
   function handleLogout() {
     if (onLogout) {
-      onLogout();
       close();
+      onLogout();
       return;
     }
 
-    clearActiveUser();
     close();
-    navigate("/login", { replace: true });
+    startTransition(() => {
+      clearActiveUser();
+      navigate("/login", { replace: true });
+    });
   }
 
   const unreadCount = notifications.filter(

@@ -1,0 +1,67 @@
+.tags-input {
+  width: 100%;
+
+  .tags-input__label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .tags-input__input {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    border-radius: 4px;
+    min-height: 36px;
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--border-focus);
+    }
+  }
+
+  .tags-input__pills-list {
+    min-height: 34px;
+    align-items: center;
+  }
+
+  .tags-input__input-field {
+    align-self: center;
+    min-height: 22px;
+    line-height: 1.2;
+  }
+
+  .tags-input__pill {
+    background: var(--accent-primary-soft);
+    border: 1px solid var(--border-accent);
+    color: var(--accent-primary-contrast);
+    border-radius: 3px;
+    font-size: 0.82rem;
+  }
+}
+
+.tags-input__dropdown {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.tags-input__option {
+  color: var(--text-primary);
+
+  &[data-hovered],
+  &[data-combobox-active] {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  &[data-checked],
+  &[data-combobox-selected] {
+    background: var(--accent-primary-soft);
+    color: var(--accent-primary-contrast);
+  }
+}

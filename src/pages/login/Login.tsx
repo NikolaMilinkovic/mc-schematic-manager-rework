@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
-import { useUserStore } from "../../store/user_store";
+import { selectIsAuthenticated, useUserStore } from "../../store/user_store";
 import "./login.scss";
 
 const apiUrl = import.meta.env.VITE_BACKEND_URL;
@@ -43,6 +43,7 @@ function setTokenCookie(token: string) {
 
 function Login() {
   const navigate = useNavigate();
+  const isAuthenticated = useUserStore(selectIsAuthenticated);
   const handleSetActiveUser = useUserStore(
     (state) => state.handleSetActiveUser,
   );
@@ -54,11 +55,10 @@ function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const token = getCookie("token");
-    if (token) {
+    if (isAuthenticated) {
       navigate("/", { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.currentTarget;
@@ -111,19 +111,22 @@ function Login() {
       }
 
       setTokenCookie(data.token);
-      const resolvedUser = data.studioUser ?? data.user;
-      if (resolvedUser) {
-        handleSetActiveUser(resolvedUser);
-      }
+      // Keep auth guard in sync even if backend omits user payload.
+      const resolvedUser = data.studioUser ??
+        data.user ?? { token: data.token };
+      handleSetActiveUser(resolvedUser);
 
       navigate("/", { replace: true });
+      return;
     } catch (err) {
       setError(
         "An error occurred while logging in. Server might be down. Call Helvos!",
       );
       console.error(err);
     } finally {
-      setIsSubmitting(false);
+      if (!isAuthenticated) {
+        setIsSubmitting(false);
+      }
     }
   }
 

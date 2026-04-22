@@ -28,7 +28,7 @@ function NotificationsBell({ count = 0 }: NotificationsBellProps) {
       label={count > 9 ? "9+" : `${count}`}
       size={18}
       radius="xl"
-      color="redstone"
+      color="darkgreen"
       className="notifications-bell__indicator"
     >
       {bell}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   Button,
   Card,
@@ -179,13 +179,15 @@ function SchematicCard({
 
   return (
     <Card className="schematic-card" radius="sm" p="md">
-      <SchematicActionModal
-        opened={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={handleConfirmAction}
-        mode={confirmMode}
-        isLoading={isBusy}
-      />
+      {confirmOpen && (
+        <SchematicActionModal
+          opened={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={handleConfirmAction}
+          mode={confirmMode}
+          isLoading={isBusy}
+        />
+      )}
 
       <Text className="schematic-card__title">{schematic.name}</Text>
 
@@ -289,4 +291,4 @@ function SchematicCard({
   );
 }
 
-export default SchematicCard;
+export default memo(SchematicCard);

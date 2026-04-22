@@ -1,4 +1,5 @@
-:root {
+:root,
+:root[data-mantine-color-scheme="dark"] {
   /* Core neutrals */
   --black: #000000;
   --white: #ffffff;
@@ -17,11 +18,11 @@
   --text-disabled: #6b747f;
 
   /* Primary accent (deep violet) */
-  --accent-primary: #6f5ab8;
-  --accent-primary-hover: #7b66c3;
-  --accent-primary-active: #624ea8;
-  --accent-primary-soft: #231c38;
-  --accent-primary-contrast: #ece8fb;
+  --accent-primary: #22c55e;
+  --accent-primary-hover: #16a34a;
+  --accent-primary-active: #15803d;
+  --accent-primary-soft: #0f1f17;
+  --accent-primary-contrast: #ecfdf5;
 
   /* Secondary accents */
   --accent-cyan: #22d3ee;
@@ -43,9 +44,68 @@
   --border-subtle: #1a1e24;
   --border-default: #252a32;
   --border-strong: #353c47;
-  --border-accent: #4b3f78;
   --border-danger: #7f1d1d;
-  --border-focus: #7b66c3;
+  --border-accent: #166534;
+  --border-focus: #22c55e;
+
+  /* Aliases for legacy usage */
+  --background: var(--bg-canvas);
+  --background-emphasis: var(--bg-surface);
+  --borders: var(--border-default);
+  --highlight: var(--accent-primary);
+  --highlight-hover: var(--accent-primary-hover);
+  --secondary: var(--text-secondary);
+  --text-grayed: var(--text-muted);
+}
+
+:root[data-mantine-color-scheme="light"] {
+  /* Core neutrals */
+  --black: #000000;
+  --white: #ffffff;
+
+  /* Background surfaces */
+  --bg-canvas: #f4f7fb;
+  --bg-subtle: #eef3f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fbff;
+  --bg-overlay: #e8eef6;
+
+  /* Text */
+  --text-primary: #1c2632;
+  --text-secondary: #4d5f72;
+  --text-muted: #6e8093;
+  --text-disabled: #98a6b4;
+
+  /* Primary accent (shared hue) */
+  --accent-primary: #6f5ab8;
+  --accent-primary-hover: #624ea8;
+  --accent-primary-active: #564596;
+  --accent-primary-soft: #ede9f8;
+  --accent-primary-contrast: #ffffff;
+
+  /* Secondary accents */
+  --accent-cyan: #0ea5c6;
+  --accent-cyan-hover: #0a8da9;
+  --accent-gold: #d9a909;
+  --accent-gold-hover: #bd9100;
+
+  /* Semantic colors */
+  --info: #0284c7;
+  --info-hover: #0369a1;
+  --success: #059669;
+  --success-hover: #047857;
+  --warning: #b45309;
+  --warning-hover: #92400e;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+
+  /* Borders */
+  --border-subtle: #dde6f0;
+  --border-default: #c8d4e2;
+  --border-strong: #aebfd2;
+  --border-accent: #b4a4df;
+  --border-danger: #e8b4b4;
+  --border-focus: #6f5ab8;
 
   /* Aliases for legacy usage */
   --background: var(--bg-canvas);

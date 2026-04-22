@@ -11,6 +11,7 @@ import ResetPassword from "./pages/reset_password/ResetPassword";
 import ResetNewPassword from "./pages/reset_password_input_new/ResetNewPassword";
 import BrowseSchematics from "./pages/browse_schematics/BrowseSchematics";
 import Navbar from "./components/navbar/Navbar";
+import UploadSchematic from "./pages/upload_schematics/UploadSchematic";
 
 type StackGuardProps = {
   redirectTo: string;
@@ -115,10 +116,7 @@ function App() {
               path="/collections/:id"
               element={<PlaceholderPage title="Collection Details" />}
             />
-            <Route
-              path="/upload-schematic"
-              element={<PlaceholderPage title="Upload Schematic" />}
-            />
+            <Route path="/upload-schematic" element={<UploadSchematic />} />
             <Route
               path="/edit-schematic/:id"
               element={<PlaceholderPage title="Edit Schematic" />}

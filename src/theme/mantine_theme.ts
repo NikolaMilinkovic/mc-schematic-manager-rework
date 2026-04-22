@@ -1,16 +1,16 @@
 import { createTheme } from "@mantine/core";
 
-const amethyst = [
-  "#ebe7f8",
-  "#d9d2ef",
-  "#bbb0e1",
-  "#9d8fd4",
-  "#866fc8",
-  "#7b66c3",
-  "#6f5ab8",
-  "#5f4da1",
-  "#4f3f87",
-  "#3e3269",
+const emerald = [
+  "#f0fdf4",
+  "#dcfce7",
+  "#bbf7d0",
+  "#86efac",
+  "#4ade80",
+  "#22c55e",
+  "#16a34a",
+  "#15803d",
+  "#166534",
+  "#14532d",
 ] as const;
 
 const stoneGray = [
@@ -66,17 +66,17 @@ const redstone = [
 ] as const;
 
 export const appTheme = createTheme({
-  primaryColor: "amethyst",
-  primaryShade: 6,
+  primaryColor: "emerald",
+  primaryShade: 5,
   colors: {
-    amethyst,
+    emerald,
     stoneGray,
     skyCyan,
     goldOre,
     redstone,
   },
   black: "#050607",
-  white: "#e5edf4",
+  white: "#e8ecef",
   defaultRadius: "sm",
   fontFamily: '"Inter Tight", "Segoe UI", sans-serif',
   headings: {

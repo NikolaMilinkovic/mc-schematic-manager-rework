@@ -7,6 +7,9 @@ type CustomFetchResponse<TData> = {
   status: number;
 };
 
+const LEGACY_ACTIVE_USER_KEY = "activeUser";
+const USER_STORE_KEY = "user-store";
+
 function getCookieValue(name: string): string | null {
   if (typeof document === "undefined") {
     return null;
@@ -29,6 +32,17 @@ function clearTokenCookie() {
   document.cookie = "token=; Max-Age=0; path=/";
 }
 
+function clearPersistedAuthState() {
+  clearTokenCookie();
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(LEGACY_ACTIVE_USER_KEY);
+  window.localStorage.removeItem(USER_STORE_KEY);
+}
+
 async function customFetch<TData = unknown>(
   url: string,
   method: string,
@@ -48,8 +62,14 @@ async function customFetch<TData = unknown>(
   });
 
   if (response.status === 401) {
-    clearTokenCookie();
-    window.location.href = "/login";
+    clearPersistedAuthState();
+
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/login"
+    ) {
+      window.location.replace("/login");
+    }
   }
 
   const contentType = response.headers.get("content-type");

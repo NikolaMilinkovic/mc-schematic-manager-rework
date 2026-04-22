@@ -3,10 +3,36 @@
   --filters-width: 280px;
 
   position: relative;
-  height: calc(100vh - 68px);
+  isolation: isolate;
+  height: calc(100vh - 80px);
   padding: var(--page-gap);
-  background: color-mix(in srgb, var(--bg-canvas) 94%, transparent);
-  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    background-image: url("/images/background/jungle-background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+  }
+
+  &::after {
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--bg-canvas) 82%, transparent),
+        color-mix(in srgb, var(--bg-subtle) 80%, transparent)
+      ),
+      color-mix(in srgb, var(--black) 54%, transparent);
+    z-index: -1;
+  }
 
   &__filters {
     position: absolute;
@@ -112,6 +138,16 @@
     border: 1px dashed var(--border-default);
     border-radius: 8px;
     background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  }
+
+  &__loading-more {
+    padding-bottom: 12px;
+  }
+
+  &__pagination {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 14px;
+    padding-bottom: 14px;
   }
 
   &__grid {

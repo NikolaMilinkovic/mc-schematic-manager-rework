@@ -1,0 +1,33 @@
+.mantine-Menu-dropdown,
+.mantine-Combobox-dropdown,
+.mantine-Popover-dropdown,
+.mantine-Select-dropdown,
+.mantine-MultiSelect-dropdown,
+.mantine-Autocomplete-dropdown {
+	background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+	border: 1px solid var(--border-default);
+	box-shadow: 0 14px 28px color-mix(in srgb, var(--black) 44%, transparent);
+}
+
+.mantine-Menu-label {
+	color: var(--text-muted);
+}
+
+.mantine-Menu-item,
+.mantine-Combobox-option {
+	color: var(--text-secondary);
+}
+
+.mantine-Menu-item[data-hovered],
+.mantine-Menu-item:hover,
+.mantine-Combobox-option[data-combobox-selected],
+.mantine-Combobox-option[data-combobox-active],
+.mantine-Combobox-option[data-hovered],
+.mantine-Combobox-option:hover {
+	color: var(--text-primary);
+	background: color-mix(in srgb, var(--accent-primary-soft) 42%, transparent);
+}
+
+.mantine-Menu-divider {
+	border-color: var(--border-subtle);
+}

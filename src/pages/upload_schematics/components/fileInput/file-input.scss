@@ -1,0 +1,32 @@
+.file-input {
+  .file-input__label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .file-input__input {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--border-strong);
+    }
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--border-focus);
+    }
+  }
+
+  &__icon {
+    display: flex;
+    color: var(--accent-primary);
+  }
+}

@@ -44,7 +44,7 @@
   &__image {
     height: 180px;
     object-fit: cover;
-    opacity: 0;
+    opacity: 0 !important;
     transition: opacity 200ms ease;
 
     &--loaded {
@@ -107,6 +107,7 @@
       &:hover,
       &:focus-visible,
       &:active {
+        background: var(--accent-primary-hover);
         color: var(--accent-primary-contrast);
       }
     }
@@ -116,6 +117,18 @@
       --button-hover-color: var(--text-secondary);
       --button-hover: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
       border: 1px solid var(--border-default);
+
+      &:hover,
+      &:focus-visible,
+      &:active {
+        color: var(--text-primary);
+        background: color-mix(
+          in srgb,
+          var(--accent-primary-soft) 36%,
+          transparent
+        );
+        border-color: var(--border-accent);
+      }
     }
 
     &--danger {

@@ -1,0 +1,99 @@
+.authenticated-page-background {
+  min-height: calc(100vh - 68px);
+  display: grid;
+  place-items: center;
+  padding: 24px 16px 48px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    background-image: url("/images/background/jungle-background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+  }
+
+  &::after {
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--bg-canvas) 82%, transparent),
+        color-mix(in srgb, var(--bg-subtle) 80%, transparent)
+      ),
+      color-mix(in srgb, var(--black) 54%, transparent);
+    z-index: -1;
+  }
+
+  &__glow {
+    position: absolute;
+    width: 560px;
+    height: 560px;
+    border-radius: 999px;
+    filter: blur(95px);
+    opacity: 0.52;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 1;
+    animation: authenticated-page-background-glow-drift 14s ease-in-out infinite
+      alternate;
+
+    &--right {
+      right: -120px;
+      top: -140px;
+      background: radial-gradient(
+        circle at 42% 42%,
+        color-mix(in srgb, var(--accent-gold) 24%, transparent) 0%,
+        color-mix(in srgb, var(--accent-gold) 12%, transparent) 24%,
+        transparent 72%
+      );
+    }
+
+    &--left {
+      left: -140px;
+      bottom: -160px;
+      background: radial-gradient(
+        circle at 56% 54%,
+        color-mix(in srgb, var(--accent-cyan) 24%, transparent) 0%,
+        color-mix(in srgb, var(--accent-cyan) 10%, transparent) 38%,
+        transparent 74%
+      );
+      animation-delay: 1.6s;
+    }
+  }
+
+  &__content {
+    width: min(980px, 100%);
+    position: relative;
+    z-index: 2;
+  }
+}
+
+@keyframes authenticated-page-background-glow-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate3d(0, -12px, 0) scale(1.04);
+  }
+}
+
+@media (max-width: 640px) {
+  .authenticated-page-background {
+    padding: 16px 12px 32px;
+
+    &__content {
+      width: 100%;
+    }
+  }
+}
