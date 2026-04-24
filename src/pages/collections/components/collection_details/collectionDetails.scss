@@ -1,7 +1,7 @@
 .collection-details {
   --page-gap: 18px;
 
-  height: calc(100vh - 66px);
+  height: calc(100vh - 80px);
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -136,6 +136,12 @@
     border: 1px solid var(--border-default);
     background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
     box-shadow: 0 18px 40px color-mix(in srgb, var(--black) 12%, transparent);
+  }
+
+  &__schematics-card {
+    background: transparent;
+    border: 0;
+    padding-top: 0 !important;
   }
 
   &__editor-card,
