@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -8,6 +8,7 @@ import {
   Group,
   Image,
   Loader,
+  Pagination,
   Stack,
   TagsInput,
   Text,
@@ -26,8 +27,9 @@ import ActionConfirmModal from "../../../../components/actionConfirmModal/Action
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
 import SchematicCard from "../../../browse_schematics/components/SchematicCard";
+import ManageSchematicsModal from "./ManageSchematicsModal";
+import CreateSchematicModal from "./CreateSchematicModal";
 import { buildCollectionUpdateFormData } from "./methods/buildCollectionUpdateFormData";
-import { filterCollectionSchematics } from "./methods/filterCollectionSchematics";
 import { getCollectionFormValues } from "./methods/getCollectionFormValues";
 import { validateCollectionForm } from "./methods/validateCollectionForm";
 import "./collectionDetails.scss";
@@ -41,7 +43,19 @@ function CollectionDetails() {
   const isDetailLoading = useCollectionsStore((state) => state.isDetailLoading);
   const isSubmitting = useCollectionsStore((state) => state.isSubmitting);
   const detailError = useCollectionsStore((state) => state.detailError);
+  const activeCollectionPage = useCollectionsStore(
+    (state) => state.activeCollectionPage,
+  );
+  const activeCollectionPageSize = useCollectionsStore(
+    (state) => state.activeCollectionPageSize,
+  );
+  const activeCollectionTotalCount = useCollectionsStore(
+    (state) => state.activeCollectionTotalCount,
+  );
   const fetchCollection = useCollectionsStore((state) => state.fetchCollection);
+  const setActiveCollectionPage = useCollectionsStore(
+    (state) => state.setActiveCollectionPage,
+  );
   const updateCollection = useCollectionsStore(
     (state) => state.updateCollection,
   );
@@ -59,22 +73,63 @@ function CollectionDetails() {
   const [tags, setTags] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
-  const [searchValue, setSearchValue] = useState("");
+  const [draftSearchValue, setDraftSearchValue] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
-  const deferredSearchValue = useDeferredValue(searchValue);
+  const [createSchematicOpen, setCreateSchematicOpen] = useState(false);
+  const [addSchematicsOpen, setAddSchematicsOpen] = useState(false);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(activeCollectionTotalCount / activeCollectionPageSize),
+  );
 
   useEffect(() => {
     if (!id) {
       navigate("/collections", { replace: true });
       return;
     }
+  }, [id, navigate]);
 
-    void fetchCollection(id);
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
 
+    void fetchCollection(id, {
+      page: activeCollectionPage,
+      pageSize: activeCollectionPageSize,
+      search: searchTerm,
+    });
+  }, [
+    activeCollectionPage,
+    activeCollectionPageSize,
+    fetchCollection,
+    id,
+    searchTerm,
+  ]);
+
+  useEffect(() => {
     return () => {
       clearActiveCollection();
     };
-  }, [clearActiveCollection, fetchCollection, id, navigate]);
+  }, [clearActiveCollection]);
+
+  useEffect(() => {
+    const normalizedSearchTerm = draftSearchValue.trim();
+
+    if (normalizedSearchTerm === searchTerm) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSearchTerm(normalizedSearchTerm);
+      setActiveCollectionPage(1);
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [draftSearchValue, searchTerm, setActiveCollectionPage]);
 
   useEffect(() => {
     const values = getCollectionFormValues(activeCollection);
@@ -97,12 +152,7 @@ function CollectionDetails() {
     };
   }, [imageFile]);
 
-  const filteredSchematics = activeCollection
-    ? filterCollectionSchematics(
-        activeCollection.schematics,
-        deferredSearchValue,
-      )
-    : [];
+  const collectionSchematics = activeCollection?.schematics ?? [];
 
   async function handleSaveChanges(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -201,7 +251,11 @@ function CollectionDetails() {
                     radius="sm"
                     variant="default"
                     onClick={() => {
-                      void fetchCollection(id);
+                      void fetchCollection(id, {
+                        page: activeCollectionPage,
+                        pageSize: activeCollectionPageSize,
+                        search: searchTerm,
+                      });
                     }}
                   >
                     Retry
@@ -232,6 +286,45 @@ function CollectionDetails() {
           description="This will permanently remove the collection. This action cannot be undone."
           confirmLabel="Remove"
           isLoading={isSubmitting}
+        />
+        <CreateSchematicModal
+          opened={createSchematicOpen}
+          onClose={() => setCreateSchematicOpen(false)}
+          onSuccess={() => {
+            if (!id) {
+              return;
+            }
+
+            void fetchCollection(id, {
+              page: activeCollectionPage,
+              pageSize: activeCollectionPageSize,
+              search: searchTerm,
+            });
+          }}
+          preselectedCollection={{
+            collection_id: activeCollection._id,
+            collection_name: activeCollection.name,
+          }}
+        />
+        <ManageSchematicsModal
+          opened={addSchematicsOpen}
+          onClose={() => setAddSchematicsOpen(false)}
+          onSuccess={() => {
+            if (!id) {
+              return;
+            }
+
+            void fetchCollection(id, {
+              page: activeCollectionPage,
+              pageSize: activeCollectionPageSize,
+              search: searchTerm,
+            });
+          }}
+          collectionId={activeCollection._id}
+          collectionName={activeCollection.name}
+          currentSchematicIds={activeCollection.schematics.map(
+            (schematic) => schematic._id,
+          )}
         />
 
         <main className="collection-details__content">
@@ -264,7 +357,7 @@ function CollectionDetails() {
                   variant="light"
                   className="collection-details__badge"
                 >
-                  {activeCollection.schematics.length} schematics
+                  {activeCollectionTotalCount} schematics
                 </Badge>
                 <Badge
                   radius="sm"
@@ -366,11 +459,10 @@ function CollectionDetails() {
                           type="button"
                           radius="sm"
                           variant="default"
-                          color="red"
                           leftSection={<IconTrash size={16} />}
                           onClick={() => setRemoveConfirmOpen(true)}
                           disabled={isSubmitting}
-                          className="collection-details__action-button"
+                          className="collection-details__action-button collection-details__action-button--danger"
                         >
                           Remove collection
                         </Button>
@@ -387,24 +479,73 @@ function CollectionDetails() {
               p="lg"
             >
               <div className="collection-details__schematics-header">
+                <div className="collection-details__schematics-actions">
+                  <Button
+                    radius="sm"
+                    variant="default"
+                    onClick={() => setCreateSchematicOpen(true)}
+                    className="collection-details__schematics-action collection-details__schematics-action--upload"
+                  >
+                    Upload Schematic
+                  </Button>
+                  <Button
+                    radius="sm"
+                    variant="default"
+                    onClick={() => setAddSchematicsOpen(true)}
+                    className="collection-details__schematics-action collection-details__schematics-action--manage"
+                  >
+                    Manage Schematics
+                  </Button>
+                </div>
+
                 <TextInput
-                  value={searchValue}
+                  value={draftSearchValue}
                   onChange={(event) =>
-                    setSearchValue(event.currentTarget.value)
+                    setDraftSearchValue(event.currentTarget.value)
                   }
                   placeholder="Search schematics or tags"
                   radius="sm"
                   leftSection={<IconSearch size={16} />}
+                  className="collection-details__search-field"
                   classNames={{
                     input: "collection-details__search-input",
                   }}
                 />
+
+                <Group gap="xs" wrap="nowrap">
+                  <ActionIcon
+                    radius="sm"
+                    variant="subtle"
+                    aria-label="Previous page"
+                    disabled={activeCollectionPage <= 1 || isDetailLoading}
+                    onClick={() =>
+                      setActiveCollectionPage(activeCollectionPage - 1)
+                    }
+                    className="collection-details__page-control"
+                  >
+                    {"<"}
+                  </ActionIcon>
+                  <ActionIcon
+                    radius="sm"
+                    variant="subtle"
+                    aria-label="Next page"
+                    disabled={
+                      activeCollectionPage >= totalPages || isDetailLoading
+                    }
+                    onClick={() =>
+                      setActiveCollectionPage(activeCollectionPage + 1)
+                    }
+                    className="collection-details__page-control"
+                  >
+                    {">"}
+                  </ActionIcon>
+                </Group>
               </div>
 
               <div className="collection-details__schematics-body">
-                {filteredSchematics.length > 0 ? (
+                {collectionSchematics.length > 0 ? (
                   <div className="collection-details__schematics-grid">
-                    {filteredSchematics.map((schematic) => (
+                    {collectionSchematics.map((schematic) => (
                       <SchematicCard
                         key={schematic._id}
                         schematic={schematic}
@@ -416,12 +557,27 @@ function CollectionDetails() {
                 ) : (
                   <div className="collection-details__empty-state">
                     <Text className="collection-details__status-text">
-                      {searchValue.trim()
+                      {draftSearchValue.trim()
                         ? "No schematics match current filter."
                         : "This collection is empty."}
                     </Text>
                   </div>
                 )}
+
+                {/* {totalPages > 1 && ( */}
+                <Group
+                  className="collection-details__pagination"
+                  justify="center"
+                >
+                  <Pagination
+                    total={totalPages}
+                    value={activeCollectionPage}
+                    onChange={setActiveCollectionPage}
+                    size="sm"
+                    radius="sm"
+                  />
+                </Group>
+                {/* )} */}
               </div>
             </Card>
           </div>

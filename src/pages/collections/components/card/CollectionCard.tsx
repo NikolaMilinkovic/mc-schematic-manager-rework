@@ -10,11 +10,15 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { Blurhash } from "react-blurhash";
 import "./collection-card.scss";
 import ActionConfirmModal from "../../../../components/actionConfirmModal/ActionConfirmModal";
-import type { Collection } from "../../../../store/collections_store";
+import { popupMessage } from "../../../../lib/popupMessage";
+import {
+  type Collection,
+  useCollectionsStore,
+} from "../../../../store/collections_store";
 import { useNavigate } from "react-router-dom";
 
 type CollectionCardProps = {
@@ -29,6 +33,10 @@ function CollectionCard({ collection, onRemove }: CollectionCardProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const revealTimeoutRef = useRef<number | null>(null);
   const navigate = useNavigate();
+  const removeCollection = useCollectionsStore(
+    (state) => state.removeCollection,
+  );
+  const isSubmitting = useCollectionsStore((state) => state.isSubmitting);
 
   const blurHash = collection.blur_hash?.hash?.trim() ?? "";
   const hasBlurHash = blurHash.length > 0;
@@ -59,9 +67,22 @@ function CollectionCard({ collection, onRemove }: CollectionCardProps) {
     setConfirmOpen(true);
   }
 
-  function handleConfirmRemove() {
+  function handleEdit(event: MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    navigate(`/collections/${collection._id}`);
+  }
+
+  async function handleConfirmRemove() {
+    const result = await removeCollection(collection._id);
+    if (!result.success) {
+      popupMessage(result.message, "error");
+      return;
+    }
+
     setConfirmOpen(false);
     onRemove?.(collection._id);
+    popupMessage(result.message, "success");
   }
 
   function handleCancelRemove() {
@@ -77,6 +98,7 @@ function CollectionCard({ collection, onRemove }: CollectionCardProps) {
         title="Remove Collection"
         description="This will permanently remove the collection. This action cannot be undone."
         confirmLabel="Remove"
+        isLoading={isSubmitting}
       />
 
       <Card
@@ -137,16 +159,27 @@ function CollectionCard({ collection, onRemove }: CollectionCardProps) {
               </Badge>
             ))}
           </Group>
-          <Button
-            radius="xs"
-            variant="subtle"
-            color="red"
-            leftSection={<IconTrash size={15} />}
-            onClick={handleRemove}
-            className="collection-card__button collection-card__button--danger"
-          >
-            Remove
-          </Button>
+          <Group grow wrap="nowrap" className="collection-card__actions-row">
+            <Button
+              radius="xs"
+              variant="subtle"
+              aria-label="Edit collection"
+              onClick={handleEdit}
+              className="collection-card__button collection-card__button--edit"
+            >
+              <IconEdit size={16} />
+            </Button>
+            <Button
+              radius="xs"
+              variant="subtle"
+              color="red"
+              aria-label="Remove collection"
+              onClick={handleRemove}
+              className="collection-card__button collection-card__button--danger"
+            >
+              <IconTrash size={16} />
+            </Button>
+          </Group>
         </Stack>
       </Card>
     </>

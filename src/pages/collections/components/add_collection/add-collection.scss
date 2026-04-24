@@ -1,0 +1,41 @@
+.add-collection-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &__title {
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  &__hint {
+    color: var(--text-secondary);
+    margin-top: -0.2rem;
+  }
+
+  &__form {
+    flex: 1;
+  }
+
+  &__field-label {
+    color: var(--text-secondary);
+  }
+
+  &__field-input {
+    border-color: var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    color: var(--text-primary);
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--border-focus);
+    }
+  }
+
+  &__button {
+    width: 100%;
+  }
+}

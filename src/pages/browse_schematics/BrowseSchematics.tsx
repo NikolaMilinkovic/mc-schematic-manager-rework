@@ -2,28 +2,38 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Affix,
+  Button,
   Group,
   Loader,
   Pagination,
   Text,
   Transition,
 } from "@mantine/core";
-import { IconArrowUp } from "@tabler/icons-react";
+import {
+  IconArrowUp,
+  IconChevronLeft,
+  IconChevronRight,
+} from "@tabler/icons-react";
 import { useSchematicsStore } from "../../store/schematic_store";
+import { useCollectionsStore } from "../../store/collections_store";
+import CreateSchematicModal from "../collections/components/collection_details/CreateSchematicModal";
 import BrowseFilters from "./components/BrowseFilters";
 import SchematicCard from "./components/SchematicCard";
 import "./browse-schematics.scss";
 
 function BrowseSchematics() {
-  const contentRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [visibleCardsCount, setVisibleCardsCount] = useState(0);
   const [draftSearchTerm, setDraftSearchTerm] = useState("");
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   const schematics = useSchematicsStore((state) => state.schematics);
-  const availableTags = useSchematicsStore((state) => state.availableTags);
   const searchTerm = useSchematicsStore((state) => state.searchTerm);
   const selectedTags = useSchematicsStore((state) => state.selectedTags);
+  const selectedCollectionIds = useSchematicsStore(
+    (state) => state.selectedCollectionIds,
+  );
   const isLoading = useSchematicsStore((state) => state.isLoading);
   const error = useSchematicsStore((state) => state.error);
   const currentPage = useSchematicsStore((state) => state.currentPage);
@@ -32,10 +42,19 @@ function BrowseSchematics() {
   const fetchSchematics = useSchematicsStore((state) => state.fetchSchematics);
   const setSearchTerm = useSchematicsStore((state) => state.setSearchTerm);
   const setSelectedTags = useSchematicsStore((state) => state.setSelectedTags);
+  const setSelectedCollectionIds = useSchematicsStore(
+    (state) => state.setSelectedCollectionIds,
+  );
   const clearFilters = useSchematicsStore((state) => state.clearFilters);
   const setPage = useSchematicsStore((state) => state.setPage);
   const removeSchematicLocal = useSchematicsStore(
     (state) => state.removeSchematicLocal,
+  );
+  const collectionOptions = useCollectionsStore(
+    (state) => state.collectionOptions,
+  );
+  const fetchCollectionOptions = useCollectionsStore(
+    (state) => state.fetchCollectionOptions,
   );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -47,6 +66,10 @@ function BrowseSchematics() {
   useEffect(() => {
     void fetchSchematics();
   }, [fetchSchematics]);
+
+  useEffect(() => {
+    void fetchCollectionOptions();
+  }, [fetchCollectionOptions]);
 
   useEffect(() => {
     if (draftSearchTerm === searchTerm) {
@@ -139,7 +162,31 @@ function BrowseSchematics() {
     contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function handlePreviousPage() {
+    if (currentPage <= 1) {
+      return;
+    }
+
+    handlePageChange(currentPage - 1);
+  }
+
+  function handleNextPage() {
+    if (currentPage >= totalPages) {
+      return;
+    }
+
+    handlePageChange(currentPage + 1);
+  }
+
   const hasSchematics = schematics.length > 0;
+  const collectionFilterOptions = useMemo(
+    () =>
+      collectionOptions.map((collection) => ({
+        value: collection.collection_id,
+        label: collection.collection_name,
+      })),
+    [collectionOptions],
+  );
   const visibleSchematics = useMemo(
     () => schematics.slice(0, visibleCardsCount),
     [schematics, visibleCardsCount],
@@ -151,49 +198,85 @@ function BrowseSchematics() {
       <BrowseFilters
         searchTerm={draftSearchTerm}
         selectedTags={selectedTags}
-        availableTags={availableTags}
+        selectedCollectionIds={selectedCollectionIds}
+        collectionOptions={collectionFilterOptions}
         onSearchTermChange={setDraftSearchTerm}
         onSelectedTagsChange={setSelectedTags}
+        onSelectedCollectionIdsChange={setSelectedCollectionIds}
         onClearFilters={clearFilters}
       />
 
-      <main className="browse-schematics__content" ref={contentRef}>
-        {error && (
-          <Text
-            className="browse-schematics__status browse-schematics__status--error"
-            mb="md"
-          >
-            {error}
-          </Text>
-        )}
+      <main className="browse-schematics__content">
+        <div className="browse-schematics__content-header">
+          <Text className="browse-schematics__title">Browse Schematics</Text>
 
-        {isLoading ? (
-          <Group className="browse-schematics__loading-wrap" justify="center">
-            <Loader size="sm" />
+          <Group gap="xs" className="browse-schematics__header-actions">
+            <Button
+              radius="sm"
+              onClick={() => setUploadModalOpen(true)}
+              className="browse-schematics__upload-button"
+            >
+              Upload Schematic
+            </Button>
+            <ActionIcon
+              variant="default"
+              radius="sm"
+              className="browse-schematics__page-nav-button"
+              aria-label="Previous page"
+              onClick={handlePreviousPage}
+              disabled={isLoading || currentPage <= 1}
+            >
+              <IconChevronLeft size={16} />
+            </ActionIcon>
+            <ActionIcon
+              variant="default"
+              radius="sm"
+              className="browse-schematics__page-nav-button"
+              aria-label="Next page"
+              onClick={handleNextPage}
+              disabled={isLoading || currentPage >= totalPages}
+            >
+              <IconChevronRight size={16} />
+            </ActionIcon>
           </Group>
-        ) : hasSchematics ? (
-          <>
-            <div className="browse-schematics__grid">
-              {visibleSchematics.map((schematic) => (
-                <SchematicCard
-                  key={schematic._id}
-                  schematic={schematic}
-                  onRemoved={removeSchematicLocal}
-                />
-              ))}
-            </div>
+        </div>
 
-            {hasMoreCardsToRender && (
-              <Group
-                className="browse-schematics__loading-more"
-                justify="center"
-                mt="sm"
-              >
-                <Loader size="xs" />
-              </Group>
-            )}
+        <div className="browse-schematics__content-body" ref={contentRef}>
+          {error && (
+            <Text
+              className="browse-schematics__status browse-schematics__status--error"
+              mb="md"
+            >
+              {error}
+            </Text>
+          )}
 
-            {totalPages > 1 && (
+          {isLoading ? (
+            <Group className="browse-schematics__loading-wrap" justify="center">
+              <Loader size="sm" />
+            </Group>
+          ) : hasSchematics ? (
+            <>
+              <div className="browse-schematics__grid">
+                {visibleSchematics.map((schematic) => (
+                  <SchematicCard
+                    key={schematic._id}
+                    schematic={schematic}
+                    onRemoved={removeSchematicLocal}
+                  />
+                ))}
+              </div>
+
+              {hasMoreCardsToRender && (
+                <Group
+                  className="browse-schematics__loading-more"
+                  justify="center"
+                  mt="sm"
+                >
+                  <Loader size="xs" />
+                </Group>
+              )}
+
               <Group
                 className="browse-schematics__pagination"
                 justify="center"
@@ -208,16 +291,24 @@ function BrowseSchematics() {
                   radius="sm"
                 />
               </Group>
-            )}
-          </>
-        ) : (
-          <Group className="browse-schematics__empty-wrap" justify="center">
-            <Text className="browse-schematics__status">
-              No schematics match your current filters.
-            </Text>
-          </Group>
-        )}
+            </>
+          ) : (
+            <Group className="browse-schematics__empty-wrap" justify="center">
+              <Text className="browse-schematics__status">
+                No schematics match your current filters.
+              </Text>
+            </Group>
+          )}
+        </div>
       </main>
+
+      <CreateSchematicModal
+        opened={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSuccess={() => {
+          void fetchSchematics(currentPage);
+        }}
+      />
 
       <Affix position={{ bottom: 24, right: 24 }}>
         <Transition transition="slide-up" mounted={showScrollTop}>

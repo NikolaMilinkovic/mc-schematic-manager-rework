@@ -3,6 +3,8 @@
   background: color-mix(in srgb, var(--bg-surface) 95%, transparent);
   display: flex;
   flex-direction: column;
+  min-width: 230px;
+  width: 100%;
 
   &__title {
     color: var(--text-primary);
@@ -44,7 +46,7 @@
   &__image {
     height: 180px;
     object-fit: cover;
-    opacity: 0 !important;
+    // opacity: 0 !important;
     transition: opacity 200ms ease;
 
     &--loaded {

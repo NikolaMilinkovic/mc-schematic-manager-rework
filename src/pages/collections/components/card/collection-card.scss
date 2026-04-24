@@ -3,6 +3,9 @@
   background: color-mix(in srgb, var(--bg-surface) 95%, transparent);
   display: flex;
   flex-direction: column;
+  min-width: 230px;
+  width: 100%;
+  cursor: pointer;
 
   &__title {
     color: var(--text-primary);
@@ -43,7 +46,7 @@
   &__image {
     height: 180px;
     object-fit: cover;
-    opacity: 0 !important;
+    // opacity: 0 !important;
     transition: opacity 200ms ease;
     &--loaded {
       opacity: 1;
@@ -60,11 +63,14 @@
 
   &__tags-wrap {
     margin-top: 10px;
-    min-height: 24px;
+    min-height: 54px;
+    max-height: 54px;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     justify-content: center;
+    align-content: flex-start;
+    overflow: hidden;
   }
 
   &__tag {
@@ -88,8 +94,32 @@
     gap: 8px;
   }
 
+  &__actions-row {
+    margin-top: 2px;
+  }
+
   &__button {
     border-radius: 6px;
+    cursor: pointer;
+    min-width: 0;
+    padding-inline: 0;
+
+    .mantine-Button-inner {
+      justify-content: center;
+    }
+
+    &--edit {
+      --button-color: var(--accent-primary);
+      --button-hover-color: var(--accent-primary);
+      --button-hover: color-mix(
+        in srgb,
+        var(--accent-primary) 12%,
+        transparent
+      );
+      border: 1px solid var(--border-accent);
+      color: var(--text-primary);
+    }
+
     &--danger {
       --button-color: var(--danger);
       --button-hover-color: var(--danger);

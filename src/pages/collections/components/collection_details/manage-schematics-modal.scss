@@ -1,0 +1,214 @@
+.manage-schematics-modal {
+  &__content {
+    border: 1px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+    box-shadow: 0 20px 44px color-mix(in srgb, var(--black) 42%, transparent);
+  }
+
+  &__header {
+    align-items: center;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+  }
+
+  &__body {
+    padding-top: 0.8rem;
+  }
+
+  &__title {
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  &__filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  &__search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__search-field {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__search-input {
+    min-height: 36px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+
+  &__page-control {
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
+
+    &:hover {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--bg-overlay) 84%, transparent);
+      border-color: var(--border-strong);
+    }
+  }
+
+  &__body-content {
+    margin-top: 12px;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+  }
+
+  &__error-text {
+    color: var(--danger);
+    margin-bottom: 8px;
+  }
+
+  &__loading-wrap,
+  &__empty-wrap {
+    min-height: 180px;
+    border: 1px dashed var(--border-default);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-elevated) 72%, transparent);
+  }
+
+  &__status-text {
+    color: var(--text-secondary);
+  }
+
+  &__list {
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  &__item {
+    width: 100%;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    padding: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--border-strong);
+      background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+    }
+
+    &--selected {
+      border-color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    }
+  }
+
+  &__thumb-wrap {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+  }
+
+  &__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  &__hover-preview {
+    border: 1px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+    border-radius: 8px;
+    padding: 8px;
+  }
+
+  &__hover-image {
+    width: 240px;
+    max-width: min(240px, 58vw);
+    height: 168px;
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+  }
+
+  &__hover-empty {
+    color: var(--text-secondary);
+    min-width: 180px;
+    text-align: center;
+  }
+
+  &__checkbox {
+    margin-top: 2px;
+  }
+
+  &__item-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__item-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  &__tags {
+    flex-wrap: wrap;
+  }
+
+  &__tag {
+    border: 1px solid var(--border-accent);
+    background: var(--accent-primary-soft);
+    color: var(--accent-primary-contrast);
+  }
+
+  &__pagination {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  &__actions {
+    margin-top: 10px;
+  }
+
+  &__selected-text {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 720px) {
+    &__search-row,
+    &__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__actions {
+      justify-content: flex-start;
+    }
+  }
+}

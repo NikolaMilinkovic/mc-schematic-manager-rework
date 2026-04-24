@@ -33,18 +33,66 @@ export interface CollectionOption {
   collection_name: string;
 }
 
+function normalizeCollectionOption(input: unknown): CollectionOption | null {
+  if (!input || typeof input !== "object") {
+    return null;
+  }
+
+  const record = input as Record<string, unknown>;
+  const rawId = record.collection_id ?? record._id ?? record.id;
+
+  if (rawId === null || rawId === undefined) {
+    return null;
+  }
+
+  const collection_id = String(rawId).trim();
+  if (!collection_id) {
+    return null;
+  }
+
+  const rawName = record.collection_name ?? record.name ?? record.label;
+  const collection_name =
+    typeof rawName === "string" && rawName.trim()
+      ? rawName.trim()
+      : `Collection ${collection_id}`;
+
+  return {
+    collection_id,
+    collection_name,
+  };
+}
+
 type CollectionsResponse = {
   collections?: Collection[];
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
   message?: string;
 };
 
 type CollectionResponse = {
   collection?: CollectionDetail;
   message?: string;
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+type CreateCollectionResponse = {
+  collection?: Collection;
+  message?: string;
 };
 
 type CollectionOptionsResponse = {
   collections?: CollectionOption[];
+};
+
+type AvailableSchematicsResponse = {
+  schematics?: Schematic[];
+  totalCount?: number;
+  page?: number;
+  pageSize?: number;
+  message?: string;
 };
 
 type ActionResult<TData = void> = {
@@ -57,18 +105,51 @@ interface CollectionsState {
   collections: Collection[];
   activeCollection: CollectionDetail | null;
   collectionOptions: CollectionOption[];
+  activeCollectionSearchTerm: string;
+  activeCollectionPage: number;
+  activeCollectionPageSize: number;
+  activeCollectionTotalCount: number;
+  collectionsPage: number;
+  collectionsPageSize: number;
+  collectionsTotalCount: number;
   isLoading: boolean;
   isDetailLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
   detailError: string | null;
-  fetchCollections: () => Promise<void>;
+  fetchCollections: (options?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+  }) => Promise<void>;
   fetchCollectionOptions: () => Promise<CollectionOption[]>;
-  fetchCollection: (collectionId: string) => Promise<CollectionDetail | null>;
+  fetchSchematicsForSelection: (options?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+  }) => Promise<{
+    schematics: Schematic[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+  } | null>;
+  replaceCollectionSchematics: (payload: {
+    collectionId: string;
+    schematicIds: string[];
+  }) => Promise<ActionResult>;
+  fetchCollection: (
+    collectionId: string,
+    options?: { page?: number; pageSize?: number; search?: string },
+  ) => Promise<CollectionDetail | null>;
+  setActiveCollectionSearchTerm: (term: string) => void;
+  setActiveCollectionPage: (page: number) => void;
+  resetActiveCollectionQuery: () => void;
+  setCollectionsPage: (page: number) => void;
   updateCollection: (
     collectionId: string,
     payload: FormData,
   ) => Promise<ActionResult<CollectionDetail>>;
+  createCollection: (payload: FormData) => Promise<ActionResult<Collection>>;
   setCollections: (collections: Collection[]) => void;
   removeCollectionLocal: (collectionId: string) => void;
   removeCollection: (collectionId: string) => Promise<ActionResult>;
@@ -113,24 +194,51 @@ function upsertCollection(
   );
 }
 
+let latestCollectionFetchRequestId = 0;
+let latestCollectionsFetchRequestId = 0;
+
 export const useCollectionsStore = create<CollectionsState>((set, get) => ({
   collections: [],
   activeCollection: null,
   collectionOptions: [],
+  activeCollectionSearchTerm: "",
+  activeCollectionPage: 1,
+  activeCollectionPageSize: 100,
+  activeCollectionTotalCount: 0,
+  collectionsPage: 1,
+  collectionsPageSize: 100,
+  collectionsTotalCount: 0,
   isLoading: true,
   isDetailLoading: false,
   isSubmitting: false,
   error: null,
   detailError: null,
 
-  fetchCollections: async () => {
+  fetchCollections: async (options) => {
+    const requestId = ++latestCollectionsFetchRequestId;
+    const { collectionsPage, collectionsPageSize } = get();
+    const targetPage = options?.page ?? collectionsPage;
+    const targetPageSize = options?.pageSize ?? collectionsPageSize;
+    const targetSearch = options?.search?.trim() ?? "";
+
     set({ isLoading: true, error: null });
 
     try {
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
+
+      if (targetSearch) {
+        params.set("search", targetSearch);
+      }
+
       const response = await customFetch<CollectionsResponse>(
-        "/get-collections",
+        `/get-collections?${params.toString()}`,
         "GET",
       );
+
+      if (requestId !== latestCollectionsFetchRequestId) return;
 
       if (response.status >= 400) {
         set({
@@ -144,14 +252,18 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
         return;
       }
 
-      set({
+      set((state) => ({
         collections: Array.isArray(response.data?.collections)
           ? response.data.collections
           : [],
+        collectionsTotalCount: response.data?.totalCount ?? 0,
+        collectionsPageSize:
+          response.data?.pageSize ?? state.collectionsPageSize,
         isLoading: false,
         error: null,
-      });
+      }));
     } catch {
+      if (requestId !== latestCollectionsFetchRequestId) return;
       set({
         collections: [],
         isLoading: false,
@@ -169,6 +281,8 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
 
       const collectionOptions = Array.isArray(response.data?.collections)
         ? response.data.collections
+            .map((option) => normalizeCollectionOption(option))
+            .filter((option): option is CollectionOption => Boolean(option))
         : [];
 
       set({ collectionOptions });
@@ -179,19 +293,120 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
     }
   },
 
-  fetchCollection: async (collectionId) => {
+  fetchSchematicsForSelection: async (options) => {
+    const targetPage = options?.page ?? 1;
+    const targetPageSize = options?.pageSize ?? 100;
+    const targetSearch = options?.search?.trim() ?? "";
+
+    try {
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
+
+      if (targetSearch) {
+        params.set("search", targetSearch);
+      }
+
+      const response = await customFetch<AvailableSchematicsResponse>(
+        `/get-schematics?${params.toString()}`,
+        "GET",
+      );
+
+      if (response.status >= 400) {
+        return null;
+      }
+
+      return {
+        schematics: Array.isArray(response.data?.schematics)
+          ? response.data.schematics
+          : [],
+        totalCount: response.data?.totalCount ?? 0,
+        page: response.data?.page ?? targetPage,
+        pageSize: response.data?.pageSize ?? targetPageSize,
+      };
+    } catch {
+      return null;
+    }
+  },
+
+  replaceCollectionSchematics: async ({ collectionId, schematicIds }) => {
+    set({ isSubmitting: true });
+
+    try {
+      const response = await customFetch<{ message?: string }>(
+        `/add-schematics-to-collection/${collectionId}`,
+        "POST",
+        JSON.stringify({ schematicIds }),
+        {
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (![200, 201].includes(response.status)) {
+        const message = getMessage(
+          "Failed to update collection schematics.",
+          response.data,
+        );
+        set({ isSubmitting: false });
+        return { success: false, message };
+      }
+
+      set({ isSubmitting: false });
+      return {
+        success: true,
+        message: getMessage(
+          "Collection schematics updated successfully.",
+          response.data,
+        ),
+      };
+    } catch {
+      set({ isSubmitting: false });
+      return {
+        success: false,
+        message: "Failed to update collection schematics.",
+      };
+    }
+  },
+
+  fetchCollection: async (collectionId, options) => {
+    const requestId = ++latestCollectionFetchRequestId;
+
+    const {
+      activeCollectionPage,
+      activeCollectionPageSize,
+      activeCollectionSearchTerm,
+    } = get();
+    const targetPage = options?.page ?? activeCollectionPage;
+    const targetPageSize = options?.pageSize ?? activeCollectionPageSize;
+    const targetSearch = options?.search ?? activeCollectionSearchTerm;
+
     set({ isDetailLoading: true, detailError: null });
 
     try {
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
+
+      if (targetSearch.trim()) {
+        params.set("search", targetSearch.trim());
+      }
+
       const response = await customFetch<CollectionResponse>(
-        `/get-collection/${collectionId}`,
+        `/get-collection/${collectionId}?${params.toString()}`,
         "GET",
       );
+
+      if (requestId !== latestCollectionFetchRequestId) {
+        return null;
+      }
 
       if (response.status >= 400 || !response.data?.collection) {
         set({
           activeCollection: null,
           isDetailLoading: false,
+          activeCollectionTotalCount: 0,
           detailError: getMessage(
             "Failed to load collection. Please try again.",
             response.data,
@@ -204,6 +419,10 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
 
       set((state) => ({
         activeCollection: collection,
+        activeCollectionTotalCount:
+          response.data?.totalCount ?? collection.schematics.length,
+        activeCollectionPageSize:
+          response.data?.pageSize ?? state.activeCollectionPageSize,
         collections: upsertCollection(
           state.collections,
           toCollectionSummary(collection),
@@ -214,13 +433,40 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
 
       return collection;
     } catch {
+      if (requestId !== latestCollectionFetchRequestId) {
+        return null;
+      }
+
       set({
         activeCollection: null,
         isDetailLoading: false,
+        activeCollectionTotalCount: 0,
         detailError: "Failed to load collection. Please try again.",
       });
       return null;
     }
+  },
+
+  setActiveCollectionSearchTerm: (term) => {
+    set({ activeCollectionSearchTerm: term, activeCollectionPage: 1 });
+  },
+
+  setActiveCollectionPage: (page) => {
+    const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+    set({ activeCollectionPage: safePage });
+  },
+
+  resetActiveCollectionQuery: () => {
+    set({
+      activeCollectionSearchTerm: "",
+      activeCollectionPage: 1,
+      activeCollectionTotalCount: 0,
+    });
+  },
+
+  setCollectionsPage: (page) => {
+    const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
+    set({ collectionsPage: safePage });
   },
 
   updateCollection: async (collectionId, payload) => {
@@ -253,6 +499,40 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
     } catch {
       const message = "Failed to update collection.";
       set({ isSubmitting: false, detailError: message });
+      return { success: false, message };
+    }
+  },
+
+  createCollection: async (payload) => {
+    set({ isSubmitting: true, error: null });
+
+    try {
+      const response = await customFetch<CreateCollectionResponse>(
+        "/add-new-collection",
+        "POST",
+        payload,
+      );
+
+      if (![200, 201].includes(response.status)) {
+        const message = getMessage(
+          "Failed to add collection. Please try again.",
+          response.data,
+        );
+        set({ isSubmitting: false, error: message });
+        return { success: false, message };
+      }
+
+      await get().fetchCollections();
+      set({ isSubmitting: false, error: null });
+
+      return {
+        success: true,
+        message: getMessage("Collection added successfully.", response.data),
+        data: response.data?.collection,
+      };
+    } catch {
+      const message = "Failed to add collection. Please try again.";
+      set({ isSubmitting: false, error: message });
       return { success: false, message };
     }
   },
@@ -313,11 +593,22 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
             (schematic) => schematic._id !== schematicId,
           ),
         },
+        activeCollectionTotalCount: Math.max(
+          0,
+          state.activeCollectionTotalCount - 1,
+        ),
       };
     });
   },
 
   clearActiveCollection: () => {
-    set({ activeCollection: null, detailError: null, isDetailLoading: false });
+    set({
+      activeCollection: null,
+      activeCollectionSearchTerm: "",
+      activeCollectionPage: 1,
+      activeCollectionTotalCount: 0,
+      detailError: null,
+      isDetailLoading: false,
+    });
   },
 }));

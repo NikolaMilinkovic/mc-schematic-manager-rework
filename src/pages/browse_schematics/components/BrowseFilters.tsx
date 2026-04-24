@@ -1,10 +1,11 @@
 import {
   ActionIcon,
   Button,
-  Checkbox,
   Drawer,
+  MultiSelect,
   Paper,
   Stack,
+  TagsInput,
   Text,
   TextInput,
   Title,
@@ -20,18 +21,22 @@ import "./browseFilters.scss";
 type BrowseFiltersProps = {
   searchTerm: string;
   selectedTags: string[];
-  availableTags: string[];
+  selectedCollectionIds: string[];
+  collectionOptions: Array<{ value: string; label: string }>;
   onSearchTermChange: (value: string) => void;
   onSelectedTagsChange: (tags: string[]) => void;
+  onSelectedCollectionIdsChange: (collectionIds: string[]) => void;
   onClearFilters: () => void;
 };
 
 function BrowseFilters({
   searchTerm,
   selectedTags,
-  availableTags,
+  selectedCollectionIds,
+  collectionOptions,
   onSearchTermChange,
   onSelectedTagsChange,
+  onSelectedCollectionIdsChange,
   onClearFilters,
 }: BrowseFiltersProps) {
   const isSmallScreen = useMediaQuery("(max-width: 980px)");
@@ -62,30 +67,42 @@ function BrowseFilters({
           <Text className="browse-schematics__filters-label" mb={8}>
             Tags
           </Text>
+          <TagsInput
+            value={selectedTags}
+            onChange={onSelectedTagsChange}
+            placeholder="Add tags and press Enter"
+            radius="sm"
+            splitChars={[","]}
+            clearable
+            classNames={{
+              input: "browse-schematics__search-input",
+              pill: "browse-schematics__tag-pill",
+            }}
+          />
+        </div>
 
-          {availableTags.length > 0 ? (
-            <Checkbox.Group
-              value={selectedTags}
-              onChange={onSelectedTagsChange}
-              className="browse-schematics__tags-list"
-            >
-              <Stack gap={8}>
-                {availableTags.map((tag) => (
-                  <Checkbox
-                    key={tag}
-                    value={tag}
-                    label={tag}
-                    radius="sm"
-                    classNames={{ label: "browse-schematics__tag-label" }}
-                  />
-                ))}
-              </Stack>
-            </Checkbox.Group>
-          ) : (
-            <Text className="browse-schematics__status">
-              No tags available yet.
-            </Text>
-          )}
+        <div>
+          <Text className="browse-schematics__filters-label" mb={8}>
+            Collections
+          </Text>
+          <MultiSelect
+            data={collectionOptions}
+            value={selectedCollectionIds}
+            onChange={onSelectedCollectionIdsChange}
+            placeholder="Select collections"
+            searchable
+            clearable
+            hidePickedOptions
+            radius="sm"
+            nothingFoundMessage="No collections found"
+            classNames={{
+              input: "browse-schematics__search-input",
+              pill: "browse-schematics__tag-pill",
+              dropdown: "browse-schematics__collections-dropdown",
+              option: "browse-schematics__collections-option",
+              empty: "browse-schematics__collections-empty",
+            }}
+          />
         </div>
 
         <Button

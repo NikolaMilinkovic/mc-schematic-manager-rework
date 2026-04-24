@@ -51,6 +51,7 @@
       height: auto;
       max-height: calc(100vh - 140px);
       overflow-y: auto;
+      overflow-x: hidden;
       border: 1px solid var(--border-subtle);
     }
   }

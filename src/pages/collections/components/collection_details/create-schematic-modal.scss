@@ -1,0 +1,100 @@
+.create-schematic-modal {
+  &__content {
+    border: 1px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+    box-shadow: 0 20px 44px color-mix(in srgb, var(--black) 42%, transparent);
+  }
+
+  &__header {
+    align-items: center;
+    gap: 14px;
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg-elevated) 92%, transparent),
+      color-mix(in srgb, var(--bg-surface) 88%, transparent)
+    );
+  }
+
+  &__title-slot {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__eyebrow {
+    color: var(--accent-cyan);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  &__body {
+    padding-top: 0.95rem;
+  }
+
+  &__title {
+    color: var(--text-primary);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  &__close-button {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+    transition:
+      color 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease;
+
+    &:hover {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--bg-overlay) 84%, transparent);
+      border-color: var(--border-strong);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &__hint {
+    color: var(--text-secondary);
+    margin-top: -0.2rem;
+  }
+
+  &__field-label {
+    color: var(--text-secondary);
+  }
+
+  &__field-input {
+    border-color: var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    color: var(--text-primary);
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--border-focus);
+    }
+  }
+
+  &__submit {
+    width: 100%;
+  }
+}

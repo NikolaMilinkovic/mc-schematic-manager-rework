@@ -27,9 +27,9 @@ export type Schematic = {
 
 type SchematicsState = {
   schematics: Schematic[];
-  availableTags: string[];
   searchTerm: string;
   selectedTags: string[];
+  selectedCollectionIds: string[];
   isLoading: boolean;
   error: string | null;
   currentPage: number;
@@ -38,25 +38,11 @@ type SchematicsState = {
   fetchSchematics: (page?: number) => Promise<void>;
   setSearchTerm: (term: string) => void;
   setSelectedTags: (tags: string[]) => void;
+  setSelectedCollectionIds: (collectionIds: string[]) => void;
   clearFilters: () => void;
   removeSchematicLocal: (schematicId: string) => void;
   setPage: (page: number) => void;
 };
-
-function extractAvailableTags(schematics: Schematic[]): string[] {
-  const tagSet = new Set<string>();
-
-  schematics.forEach((schematic) => {
-    schematic.tags.forEach((tag) => {
-      const normalized = tag.trim();
-      if (normalized) {
-        tagSet.add(normalized);
-      }
-    });
-  });
-
-  return [...tagSet].sort((a, b) => a.localeCompare(b));
-}
 
 type SchematicsPageResponse = {
   schematics: Schematic[];
@@ -65,16 +51,22 @@ type SchematicsPageResponse = {
 
 export const useSchematicsStore = create<SchematicsState>((set, get) => ({
   schematics: [],
-  availableTags: [],
   searchTerm: "",
   selectedTags: [],
+  selectedCollectionIds: [],
   isLoading: true,
   error: null,
   currentPage: 1,
-  pageSize: 24,
+  pageSize: 100,
   totalCount: 0,
   fetchSchematics: async (page) => {
-    const { searchTerm, selectedTags, pageSize, currentPage } = get();
+    const {
+      searchTerm,
+      selectedTags,
+      selectedCollectionIds,
+      pageSize,
+      currentPage,
+    } = get();
     const targetPage = page ?? currentPage;
 
     set({ isLoading: true, error: null });
@@ -93,6 +85,10 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
         params.set("tags", selectedTags.join(","));
       }
 
+      if (selectedCollectionIds.length > 0) {
+        params.set("collections", selectedCollectionIds.join(","));
+      }
+
       const response = await customFetch<SchematicsPageResponse>(
         `/get-schematics?${params.toString()}`,
         "GET",
@@ -101,7 +97,6 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
       if (response.status >= 400) {
         set({
           schematics: [],
-          availableTags: [],
           isLoading: false,
           error: "Failed to load schematics. Please try again.",
         });
@@ -114,7 +109,6 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
 
       set({
         schematics: fetchedSchematics,
-        availableTags: extractAvailableTags(fetchedSchematics),
         totalCount: response.data?.totalCount ?? 0,
         currentPage: targetPage,
         isLoading: false,
@@ -123,7 +117,6 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
     } catch {
       set({
         schematics: [],
-        availableTags: [],
         isLoading: false,
         error: "Failed to load schematics. Please try again.",
       });
@@ -137,8 +130,12 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
     set({ selectedTags: tags });
     void get().fetchSchematics(1);
   },
+  setSelectedCollectionIds: (collectionIds) => {
+    set({ selectedCollectionIds: collectionIds });
+    void get().fetchSchematics(1);
+  },
   clearFilters: () => {
-    set({ searchTerm: "", selectedTags: [] });
+    set({ searchTerm: "", selectedTags: [], selectedCollectionIds: [] });
     void get().fetchSchematics(1);
   },
   removeSchematicLocal: (schematicId) => {
