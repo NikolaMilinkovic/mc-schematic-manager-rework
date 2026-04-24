@@ -10,10 +10,10 @@ import AuthenticatedPageBackground from "../../components/authenticatedPageBackg
 import CollectionsPicker, {
   type Collection,
 } from "./components/collectionsPicker/CollectionsPicker";
+import { useCollectionsStore } from "../../store/collections_store";
 import "./upload-schematic.scss";
 
 type TagsResponse = Array<{ tags: string[] }>;
-type CollectionsResponse = { collections: Collection[] };
 
 const IMG_TYPES = new Set(["png", "jpg", "jpeg"]);
 const SCHEM_TYPES = new Set(["schematic", "schem"]);
@@ -31,13 +31,18 @@ function UploadSchematic() {
   const [tags, setTags] = useState<string[]>([]);
   const [schematicName, setSchematicName] = useState("");
   const [tagAutocomplete, setTagAutocomplete] = useState<string[]>([]);
-  const [collectionsList, setCollectionsList] = useState<Collection[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<Collection[]>(
     [],
   );
   const [schematicFile, setSchematicFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const collectionsList = useCollectionsStore(
+    (state) => state.collectionOptions,
+  );
+  const fetchCollectionOptions = useCollectionsStore(
+    (state) => state.fetchCollectionOptions,
+  );
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -59,16 +64,8 @@ function UploadSchematic() {
   }, [isPageEntering]);
 
   useEffect(() => {
-    async function fetchCollections() {
-      const res = await customFetch<CollectionsResponse>(
-        "/get-collections-list",
-        "GET",
-      );
-      console.log(res.data.collections);
-      setCollectionsList(res.data.collections ?? []);
-    }
-    fetchCollections();
-  }, []);
+    void fetchCollectionOptions();
+  }, [fetchCollectionOptions]);
 
   useEffect(() => {
     async function fetchTags() {

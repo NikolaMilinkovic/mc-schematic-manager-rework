@@ -12,6 +12,10 @@ import ResetNewPassword from "./pages/reset_password_input_new/ResetNewPassword"
 import BrowseSchematics from "./pages/browse_schematics/BrowseSchematics";
 import Navbar from "./components/navbar/Navbar";
 import UploadSchematic from "./pages/upload_schematics/UploadSchematic";
+import { Bounce, ToastContainer } from "react-toastify";
+import { useThemeContext } from "./store/theme_context";
+import Collections from "./pages/collections/Collections";
+import CollectionDetails from "./pages/collections/components/collection_details/CollectionDetails";
 
 type StackGuardProps = {
   redirectTo: string;
@@ -89,9 +93,24 @@ function PlaceholderPage({ title }: PlaceholderPageProps) {
 
 function App() {
   const [scroll, scrollTo] = useWindowScroll();
+  const { colorScheme } = useThemeContext();
 
   return (
     <>
+      <ToastContainer
+        theme={colorScheme}
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        transition={Bounce}
+      />
+
       {/* UNAUTHENTICATED ROUTES */}
       <Routes>
         <Route element={<UnauthenticatedStack />}>
@@ -108,14 +127,8 @@ function App() {
         <Route element={<AuthenticatedStack />}>
           <Route element={<AuthenticatedLayout />}>
             <Route path="/" element={<BrowseSchematics />} />
-            <Route
-              path="/collections"
-              element={<PlaceholderPage title="Collections" />}
-            />
-            <Route
-              path="/collections/:id"
-              element={<PlaceholderPage title="Collection Details" />}
-            />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/collections/:id" element={<CollectionDetails />} />
             <Route path="/upload-schematic" element={<UploadSchematic />} />
             <Route
               path="/edit-schematic/:id"

@@ -1,0 +1,60 @@
+@import url('../../../global/colors.scss');
+@import url('../../../global/global.scss');
+
+.landing-content{
+  display: grid;
+  position: relative;
+  min-width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-top: 80px;
+
+  .options-section{
+    display: flex;
+    justify-content: space-evenly;
+    background-color: var(--background);
+    align-items: center;
+
+    a{
+      text-align: center;
+    }
+  }
+
+  .collections-container{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    
+  }
+  .options-section{
+    max-height: 120px;
+  }
+}
+
+
+@media only screen and (max-width: 1444px) {
+  .collections-container{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 1rem;
+  }
+}
+@media only screen and (max-width: 1024px) {
+  .collections-container{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem;
+  }
+}
+@media only screen and (max-width: 600px) {
+  .collections-container{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+}

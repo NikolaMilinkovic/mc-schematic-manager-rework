@@ -11,9 +11,9 @@ import {
 import { IconDownload, IconEdit, IconTrash } from "@tabler/icons-react";
 import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
+import ActionConfirmModal from "../../../components/actionConfirmModal/ActionConfirmModal";
 import type { Schematic } from "../../../store/schematic_store";
 import { selectActiveUser, useUserStore } from "../../../store/user_store";
-import SchematicActionModal from "./SchematicActionModal";
 import {
   copySchematicStringAction,
   deleteSchematicAction,
@@ -82,6 +82,7 @@ function SchematicCard({
     activeUser,
     "remove_schematic",
   );
+  const isDeleteMode = confirmMode === "delete";
 
   useEffect(() => {
     return () => {
@@ -179,15 +180,19 @@ function SchematicCard({
 
   return (
     <Card className="schematic-card" radius="sm" p="md">
-      {confirmOpen && (
-        <SchematicActionModal
-          opened={confirmOpen}
-          onClose={() => setConfirmOpen(false)}
-          onConfirm={handleConfirmAction}
-          mode={confirmMode}
-          isLoading={isBusy}
-        />
-      )}
+      <ActionConfirmModal
+        opened={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={isDeleteMode ? "Delete Schematic" : "Remove From Collection"}
+        description={
+          isDeleteMode
+            ? "This will permanently delete the schematic. This action cannot be undone."
+            : "This will only remove the schematic from the current collection."
+        }
+        confirmLabel={isDeleteMode ? "Delete" : "Remove"}
+        isLoading={isBusy}
+      />
 
       <Text className="schematic-card__title">{schematic.name}</Text>
 

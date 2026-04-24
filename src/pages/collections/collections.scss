@@ -1,0 +1,66 @@
+.collections-page {
+  --page-gap: 20px;
+  position: relative;
+  isolation: isolate;
+  height: calc(100vh - 80px);
+  padding: var(--page-gap);
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    background-image: url("/images/background/jungle-background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+  }
+
+  &::after {
+    background:
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--bg-canvas) 82%, transparent),
+        color-mix(in srgb, var(--bg-subtle) 80%, transparent)
+      ),
+      color-mix(in srgb, var(--black) 54%, transparent);
+    z-index: -1;
+  }
+
+  &__content {
+    height: 100%;
+    padding-left: 8px;
+    padding-right: 2px;
+    overflow-y: auto;
+  }
+
+  &__status {
+    color: var(--text-secondary);
+    font-size: 0.86rem;
+    &--error {
+      color: var(--danger);
+    }
+  }
+
+  &__loading-wrap,
+  &__empty-wrap {
+    min-height: 160px;
+    border: 1px dashed var(--border-default);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    align-items: start;
+    gap: 14px;
+    padding-bottom: 12px;
+    padding-right: 2rem;
+  }
+}
