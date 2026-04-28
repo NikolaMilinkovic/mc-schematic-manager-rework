@@ -15,11 +15,15 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { IconDownload, IconEdit, IconTrash } from "@tabler/icons-react";
+import {
+  IconDownload,
+  IconEdit,
+  IconTrash,
+  IconCube,
+} from "@tabler/icons-react";
 import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
 import ActionConfirmModal from "../../../components/actionConfirmModal/ActionConfirmModal";
-import SchematicRendererDemoLauncher from "../../../../Examples/demo/schematic-renderer/SchematicRendererDemoLauncher";
 import type { Schematic } from "../../../store/schematic_store";
 import { selectActiveUser, useUserStore } from "../../../store/user_store";
 import {
@@ -46,6 +50,7 @@ type SchematicCardProps = {
   schematic: Schematic;
   onRemoved?: (schematicId: string) => void;
   collectionId?: string;
+  onOpenDemo?: (schematicId: string, schematicName: string) => void;
 };
 
 const IMAGE_REVEAL_DELAY_MS = 320;
@@ -66,6 +71,7 @@ function SchematicCard({
   schematic,
   onRemoved,
   collectionId,
+  onOpenDemo,
 }: SchematicCardProps) {
   const activeUser = useUserStore(selectActiveUser);
   const [copied, setCopied] = useState(false);
@@ -268,6 +274,20 @@ function SchematicCard({
               No preview image
             </div>
           )}
+          {onOpenDemo && (
+            <button
+              type="button"
+              className="schematic-card__demo-button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenDemo(schematic._id, schematic.name);
+              }}
+              aria-label="Open 3D demo"
+              title="Open 3D demo"
+            >
+              <IconCube size={18} />
+            </button>
+          )}
         </div>
 
         <Stack gap={8} mt="sm" className="schematic-card__actions">
@@ -285,11 +305,6 @@ function SchematicCard({
               {copied ? "Copied to clipboard" : "Get schematic"}
             </Button>
           )}
-
-          <SchematicRendererDemoLauncher
-            schematicId={schematic._id}
-            schematicName={schematic.name}
-          />
 
           <Group grow gap={8}>
             {canEditSchematic && (

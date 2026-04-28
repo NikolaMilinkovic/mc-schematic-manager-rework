@@ -1,37 +1,28 @@
 # Minimal Schematic Renderer Modal Demo
 
-This is a **standalone demo** for testing a modal-based 3D preview flow without adding renderer deps to app code.
+This is a **standalone demo** for testing a modal-based 3D preview flow.
 
 ## Files
 
-- `SchematicRendererDemoModal.tsx`: Modal + canvas + runtime script loading (vendor-first, then CDN fallback)
+- `SchematicRendererDemoModal.tsx`: Modal + canvas + dynamic import from npm packages
 - `SchematicRendererDemoLauncher.tsx`: Tiny host component that fetches the schematic binary from your existing API and opens the modal
 - `schematic-renderer-demo-modal.scss`: Minimal styles (BEM classes)
 
-## Runtime loading order
+## Setup
 
-The demo tries script sources in this order:
+Install dependencies:
 
-1. Local files served by Vite:
+```bash
+npm install three schematic-renderer
+```
 
-- `/vendor/three.min.js`
-- `/vendor/schematic-renderer.umd.js`
+For full block rendering, add a vanilla resource pack zip at:
 
-2. External CDN fallback:
+- `/public/vendor/vanilla-resource-pack.zip`
 
-- unpkg
-- jsDelivr
+Without a resource pack, some schematics may show block entities only (e.g. chests/signs) while regular block meshes are missing.
 
-This allows use in restricted workplace networks when CDN access is blocked.
-
-## If your network blocks npm/CDN
-
-Place these files manually in `public/vendor/`:
-
-- `three.min.js`
-- `schematic-renderer.umd.js`
-
-Then rerun app; modal will load local files first.
+The demo uses dynamic imports, so packages are only loaded when the modal opens (lazy loading).
 
 ## Quick wiring example (temporary)
 
@@ -49,5 +40,5 @@ import SchematicRendererDemoLauncher from "../../Examples/demo/schematic-rendere
 ## Notes
 
 - Keep this as demo-only code for now.
-- If you move this into production code later, prefer npm install and explicit typings.
+- The upstream library's README has known API issues (see https://github.com/Schem-at/schematic-renderer/issues). This demo works around them.
 - Upstream license for `schematic-renderer` is AGPL-3.0. Confirm legal compatibility before production use.

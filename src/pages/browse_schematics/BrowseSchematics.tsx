@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Affix,
@@ -18,9 +18,11 @@ import { useMediaQuery } from "@mantine/hooks";
 import { useSchematicsStore } from "../../store/schematic_store";
 import { useCollectionsStore } from "../../store/collections_store";
 import Loading from "../../components/loading/Loading";
+import SchematicRendererModal from "../../components/schematicRendererModal/SchematicRendererModal";
 import CreateSchematicModal from "../collections/components/collection_details/CreateSchematicModal";
 import BrowseFilters from "./components/BrowseFilters";
 import SchematicCard from "./components/SchematicCard";
+import customFetch from "../../lib/custom_fetch";
 import "./browse-schematics.scss";
 
 function BrowseSchematics() {
@@ -29,6 +31,12 @@ function BrowseSchematics() {
   const [visibleCardsCount, setVisibleCardsCount] = useState(0);
   const [draftSearchTerm, setDraftSearchTerm] = useState("");
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [demoSchematicId, setDemoSchematicId] = useState<string | null>(null);
+  const [demoSchematicName, setDemoSchematicName] = useState<string | null>(
+    null,
+  );
+  const [resourcePackBlob, setResourcePackBlob] = useState<Blob | null>(null);
 
   const schematics = useSchematicsStore((state) => state.schematics);
   const searchTerm = useSchematicsStore((state) => state.searchTerm);
@@ -72,6 +80,34 @@ function BrowseSchematics() {
   useEffect(() => {
     void fetchCollectionOptions();
   }, [fetchCollectionOptions]);
+
+  // Load resource pack once on mount
+  useEffect(() => {
+    let canceled = false;
+
+    async function loadResourcePack() {
+      try {
+        const response = await fetch("/vendor/vanilla-resource-pack.zip");
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load resource pack (HTTP ${response.status})`,
+          );
+        }
+        const blob = await response.blob();
+        if (!canceled) {
+          setResourcePackBlob(blob);
+        }
+      } catch (error) {
+        console.error("Failed to load resource pack:", error);
+      }
+    }
+
+    loadResourcePack();
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (draftSearchTerm === searchTerm) {
@@ -179,6 +215,32 @@ function BrowseSchematics() {
 
     handlePageChange(currentPage + 1);
   }
+
+  const handleOpenDemo = useCallback(
+    (schematicId: string, schematicName: string) => {
+      setDemoSchematicId(schematicId);
+      setDemoSchematicName(schematicName);
+      setDemoModalOpen(true);
+    },
+    [],
+  );
+
+  const loadSchematicArrayBuffer = useCallback(async () => {
+    if (!demoSchematicId) {
+      throw new Error("No schematic ID provided");
+    }
+
+    const response = await customFetch<Response>(
+      `/get-schematic-file/${demoSchematicId}`,
+      "GET",
+    );
+
+    if (!(response.data instanceof Response) || !response.data.ok) {
+      throw new Error("Could not fetch schematic binary.");
+    }
+
+    return response.data.arrayBuffer();
+  }, [demoSchematicId]);
 
   const hasSchematics = schematics.length > 0;
   const collectionFilterOptions = useMemo(
@@ -291,6 +353,7 @@ function BrowseSchematics() {
                     key={schematic._id}
                     schematic={schematic}
                     onRemoved={removeSchematicLocal}
+                    onOpenDemo={handleOpenDemo}
                   />
                 ))}
               </div>
@@ -348,6 +411,14 @@ function BrowseSchematics() {
           )}
         </Transition>
       </Affix>
+
+      <SchematicRendererModal
+        opened={demoModalOpen}
+        onClose={() => setDemoModalOpen(false)}
+        schematicName={demoSchematicName ?? "Schematic"}
+        loadSchematicArrayBuffer={loadSchematicArrayBuffer}
+        resourcePackBlob={resourcePackBlob}
+      />
     </section>
   );
 }

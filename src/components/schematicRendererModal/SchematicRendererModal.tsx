@@ -1,23 +1,25 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { SchematicRenderer as RendererType } from "schematic-renderer";
-import "./schematic-renderer-demo-modal.scss";
+import "./schematic-renderer-modal.scss";
 
-type SchematicRendererDemoModalProps = {
+type SchematicRendererModalProps = {
   opened: boolean;
   onClose: () => void;
   schematicName: string;
   loadSchematicArrayBuffer: () => Promise<ArrayBuffer>;
+  resourcePackBlob?: Blob | null;
 };
 
 const DEFAULT_RESOURCE_PACK_PATH = "/vendor/vanilla-resource-pack.zip";
 
-function SchematicRendererDemoModal({
+function SchematicRendererModal({
   opened,
   onClose,
   schematicName,
   loadSchematicArrayBuffer,
-}: SchematicRendererDemoModalProps) {
+  resourcePackBlob,
+}: SchematicRendererModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<RendererType | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">(
@@ -68,14 +70,16 @@ function SchematicRendererDemoModal({
         rendererRef.current = renderer as RendererType;
 
         setStage("loading-resource-pack");
-        const packResponse = await fetch(DEFAULT_RESOURCE_PACK_PATH);
-        if (!packResponse.ok) {
-          throw new Error(
-            `Resource pack not found at ${DEFAULT_RESOURCE_PACK_PATH} (HTTP ${packResponse.status}).`,
-          );
+        let packBlob = resourcePackBlob;
+        if (!packBlob) {
+          const packResponse = await fetch(DEFAULT_RESOURCE_PACK_PATH);
+          if (!packResponse.ok) {
+            throw new Error(
+              `Resource pack not found at ${DEFAULT_RESOURCE_PACK_PATH} (HTTP ${packResponse.status}).`,
+            );
+          }
+          packBlob = await packResponse.blob();
         }
-
-        const packBlob = await packResponse.blob();
 
         if (!renderer.packs) {
           throw new Error("Renderer pack manager is not available.");
@@ -148,7 +152,7 @@ function SchematicRendererDemoModal({
         renderer?.dispose?.();
         renderer?.destroy?.();
       } catch {
-        // Demo only: teardown failures can be ignored.
+        // Modal only: teardown failures can be ignored.
       }
 
       setStatus("idle");
@@ -176,50 +180,52 @@ function SchematicRendererDemoModal({
 
   return createPortal(
     <div
-      className="schematic-renderer-demo-modal"
+      className="schematic-renderer-modal"
       role="presentation"
       onClick={onClose}
     >
       <div
-        className="schematic-renderer-demo-modal__dialog"
+        className="schematic-renderer-modal__dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="schematic-renderer-demo-modal__header">
-          <h2 id={titleId} className="schematic-renderer-demo-modal__title">
+        <div className="schematic-renderer-modal__header">
+          <h2 id={titleId} className="schematic-renderer-modal__title">
             3D Preview: {schematicName}
           </h2>
           <button
             type="button"
-            className="schematic-renderer-demo-modal__close"
+            className="schematic-renderer-modal__close"
             onClick={onClose}
             aria-label="Close preview"
           >
-            Close
+            ✕
           </button>
         </div>
 
-        <div className="schematic-renderer-demo-modal__viewport">
+        <div className="schematic-renderer-modal__viewport">
           <canvas
             ref={canvasRef}
-            className="schematic-renderer-demo-modal__canvas"
+            className="schematic-renderer-modal__canvas"
             aria-label="Schematic preview canvas"
           />
 
           {status !== "ready" && (
-            <div
-              className="schematic-renderer-demo-modal__overlay"
-              role="status"
-            >
+            <div className="schematic-renderer-modal__overlay" role="status">
               {status === "loading" && (
-                <span>Loading preview ({stage})...</span>
+                <div className="schematic-renderer-modal__loading">
+                  <div className="schematic-renderer-modal__spinner" />
+                  <span>Loading preview ({stage})...</span>
+                </div>
               )}
               {status === "error" && (
-                <span>
-                  Failed to load preview at step: {stage}. {errorMessage}
-                </span>
+                <div className="schematic-renderer-modal__error">
+                  <span>
+                    Failed to load preview at step: {stage}. {errorMessage}
+                  </span>
+                </div>
               )}
             </div>
           )}
@@ -230,4 +236,4 @@ function SchematicRendererDemoModal({
   );
 }
 
-export default SchematicRendererDemoModal;
+export default SchematicRendererModal;
