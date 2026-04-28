@@ -1,0 +1,22 @@
+@use "./animations.scss" as animations;
+
+.ui-input-template,
+.mantine-Input-input.ui-input-template {
+  @include animations.interactive-hover-transition();
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-default) !important;
+
+  &:focus,
+  &:focus-visible,
+  &:focus-within {
+    border-color: var(--border-focus) !important;
+  }
+
+  &.ui-input-template--transparent {
+    background-color: transparent !important;
+  }
+
+  &.ui-input-template--elevated {
+    background-color: var(--bg-elevated) !important;
+  }
+}

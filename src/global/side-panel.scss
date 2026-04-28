@@ -1,0 +1,46 @@
+// Shared side-panel styles for translucent left-rail cards and their inputs.
+
+@mixin side-panel-shell(
+  $surface-opacity: 65%,
+  $border-color: var(--border-default),
+  $with-shadow: true,
+  $shadow-opacity: 12%
+) {
+  border: 1px solid $border-color;
+  background: color-mix(
+    in srgb,
+    var(--bg-surface) $surface-opacity,
+    transparent
+  );
+
+  @if $with-shadow {
+    box-shadow: 0
+      18px
+      40px
+      color-mix(in srgb, var(--black) $shadow-opacity, transparent);
+  }
+}
+
+@mixin side-panel-input($surface-opacity: 65%) {
+  border-color: var(--border-default) !important;
+  background: color-mix(
+    in srgb,
+    var(--bg-surface) $surface-opacity,
+    transparent
+  ) !important;
+  color: var(--text-primary) !important;
+
+  &:focus,
+  &:focus-within,
+  &:focus-visible {
+    border-color: var(--border-focus) !important;
+  }
+}
+
+@mixin side-panel-input-bg($surface-opacity: 65%) {
+  background-color: color-mix(
+    in srgb,
+    var(--bg-surface) $surface-opacity,
+    transparent
+  ) !important;
+}

@@ -14,8 +14,10 @@ import {
   IconChevronLeft,
   IconChevronRight,
 } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
 import { useSchematicsStore } from "../../store/schematic_store";
 import { useCollectionsStore } from "../../store/collections_store";
+import Loading from "../../components/loading/Loading";
 import CreateSchematicModal from "../collections/components/collection_details/CreateSchematicModal";
 import BrowseFilters from "./components/BrowseFilters";
 import SchematicCard from "./components/SchematicCard";
@@ -192,29 +194,57 @@ function BrowseSchematics() {
     [schematics, visibleCardsCount],
   );
   const hasMoreCardsToRender = visibleCardsCount < schematics.length;
+  const isCompactHeaderLayout = useMediaQuery("(max-width: 980px)");
+  const filtersProps = {
+    searchTerm: draftSearchTerm,
+    selectedTags,
+    selectedCollectionIds,
+    collectionOptions: collectionFilterOptions,
+    onSearchTermChange: setDraftSearchTerm,
+    onSelectedTagsChange: setSelectedTags,
+    onSelectedCollectionIdsChange: setSelectedCollectionIds,
+    onClearFilters: clearFilters,
+  };
 
   return (
     <section className="browse-schematics page-fade-in">
-      <BrowseFilters
-        searchTerm={draftSearchTerm}
-        selectedTags={selectedTags}
-        selectedCollectionIds={selectedCollectionIds}
-        collectionOptions={collectionFilterOptions}
-        onSearchTermChange={setDraftSearchTerm}
-        onSelectedTagsChange={setSelectedTags}
-        onSelectedCollectionIdsChange={setSelectedCollectionIds}
-        onClearFilters={clearFilters}
-      />
+      {!isCompactHeaderLayout && <BrowseFilters {...filtersProps} />}
 
       <main className="browse-schematics__content">
-        <div className="browse-schematics__content-header">
-          <Text className="browse-schematics__title">Browse Schematics</Text>
+        <div
+          className={`browse-schematics__content-header${
+            isCompactHeaderLayout
+              ? " browse-schematics__content-header--compact"
+              : ""
+          }`}
+        >
+          {isCompactHeaderLayout && (
+            <div className="browse-schematics__header-left">
+              <BrowseFilters {...filtersProps} forceToggle />
+            </div>
+          )}
 
-          <Group gap="xs" className="browse-schematics__header-actions">
+          <Text
+            className={`browse-schematics__title${
+              isCompactHeaderLayout ? " browse-schematics__title--compact" : ""
+            }`}
+          >
+            Browse Schematics
+          </Text>
+
+          <Group
+            gap="xs"
+            className={`browse-schematics__header-actions${
+              isCompactHeaderLayout
+                ? " browse-schematics__header-actions--compact"
+                : ""
+            }`}
+          >
             <Button
+              variant="subtle"
               radius="sm"
               onClick={() => setUploadModalOpen(true)}
-              className="browse-schematics__upload-button"
+              className="ui-button-template ui-button-template--surface browse-schematics__upload-button"
             >
               Upload Schematic
             </Button>
@@ -252,9 +282,7 @@ function BrowseSchematics() {
           )}
 
           {isLoading ? (
-            <Group className="browse-schematics__loading-wrap" justify="center">
-              <Loader size="sm" />
-            </Group>
+            <Loading />
           ) : hasSchematics ? (
             <>
               <div className="browse-schematics__grid">
@@ -267,15 +295,7 @@ function BrowseSchematics() {
                 ))}
               </div>
 
-              {hasMoreCardsToRender && (
-                <Group
-                  className="browse-schematics__loading-more"
-                  justify="center"
-                  mt="sm"
-                >
-                  <Loader size="xs" />
-                </Group>
-              )}
+              {hasMoreCardsToRender && <Loading />}
 
               <Group
                 className="browse-schematics__pagination"
@@ -313,16 +333,18 @@ function BrowseSchematics() {
       <Affix position={{ bottom: 24, right: 24 }}>
         <Transition transition="slide-up" mounted={showScrollTop}>
           {(transitionStyles) => (
-            <ActionIcon
-              aria-label="Scroll list to top"
-              radius="xl"
-              size="lg"
-              variant="filled"
-              style={transitionStyles}
-              onClick={handleScrollListToTop}
-            >
-              <IconArrowUp size={18} />
-            </ActionIcon>
+            <div style={transitionStyles}>
+              <ActionIcon
+                aria-label="Scroll list to top"
+                radius="xl"
+                size="lg"
+                variant="filled"
+                className="browse-schematics__scroll-top-button"
+                onClick={handleScrollListToTop}
+              >
+                <IconArrowUp size={18} />
+              </ActionIcon>
+            </div>
           )}
         </Transition>
       </Affix>

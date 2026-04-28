@@ -1,18 +1,27 @@
 import { useEffect, useState } from "react";
 import {
   ActionIcon,
+  Button,
   Card,
+  Drawer,
   Group,
-  Loader,
   Pagination,
   Text,
   TextInput,
 } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
 import CollectionCard from "./components/card/CollectionCard";
 import AddCollection from "./components/add_collection/AddCollection";
 import "./collections.scss";
 import { useCollectionsStore } from "../../store/collections_store";
+import Loading from "../../components/loading/Loading";
 
 const Collections: React.FC = () => {
   const collections = useCollectionsStore((s) => s.collections);
@@ -28,6 +37,9 @@ const Collections: React.FC = () => {
 
   const [draftSearch, setDraftSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const isCompactLayout = useMediaQuery("(max-width: 980px)");
+  const [isAddDrawerOpened, { open: openAddDrawer, close: closeAddDrawer }] =
+    useDisclosure(false);
 
   const totalPages = Math.max(
     1,
@@ -48,18 +60,29 @@ const Collections: React.FC = () => {
     return () => window.clearTimeout(id);
   }, [draftSearch, searchTerm, setCollectionsPage]);
 
+  useEffect(() => {
+    if (!isCompactLayout) {
+      closeAddDrawer();
+    }
+  }, [closeAddDrawer, isCompactLayout]);
+
+  function handleAddCollectionSuccess() {
+    void fetchCollections({ page: 1, search: searchTerm });
+    if (isCompactLayout) {
+      closeAddDrawer();
+    }
+  }
+
   return (
     <section className="collections-page page-fade-in">
       <div className="collections-page__background" />
       <main className="collections-page__content">
         <div className="collections-page__layout">
-          <Card className="collections-page__sidebar-card" radius="sm" p="lg">
-            <AddCollection
-              onSuccess={() =>
-                void fetchCollections({ page: 1, search: searchTerm })
-              }
-            />
-          </Card>
+          {!isCompactLayout && (
+            <Card className="collections-page__sidebar-card" radius="sm" p="lg">
+              <AddCollection onSuccess={handleAddCollectionSuccess} />
+            </Card>
+          )}
 
           <Card
             className="collections-page__collections-card"
@@ -67,37 +90,64 @@ const Collections: React.FC = () => {
             p="lg"
           >
             <div className="collections-page__collections-header">
-              <TextInput
-                value={draftSearch}
-                onChange={(e) => setDraftSearch(e.currentTarget.value)}
-                placeholder="Search by name or tags"
-                radius="sm"
-                leftSection={<IconSearch size={16} />}
-                className="collections-page__search-field"
-                classNames={{ input: "collections-page__search-input" }}
-              />
-              <Group gap="xs" wrap="nowrap">
-                <ActionIcon
-                  radius="sm"
-                  variant="subtle"
-                  aria-label="Previous page"
-                  disabled={collectionsPage <= 1 || isLoading}
-                  onClick={() => setCollectionsPage(collectionsPage - 1)}
-                  className="collections-page__page-control"
+              <Text className="collections-page__title">
+                Browse Collections
+              </Text>
+
+              <div className="collections-page__header-right">
+                <div className="collections-page__search-actions">
+                  <TextInput
+                    value={draftSearch}
+                    onChange={(e) => setDraftSearch(e.currentTarget.value)}
+                    placeholder="Search by name or tags"
+                    radius="sm"
+                    leftSection={<IconSearch size={16} />}
+                    className="collections-page__search-field"
+                    classNames={{
+                      input:
+                        "collections-page__search-input ui-input-template ui-input-template--transparent ",
+                    }}
+                  />
+                  {isCompactLayout && (
+                    <Button
+                      variant="subtle"
+                      radius="xs"
+                      leftSection={<IconPlus size={16} />}
+                      onClick={openAddDrawer}
+                      className="ui-button-template ui-button-template--surface collections-page__add-toggle"
+                    >
+                      Add
+                    </Button>
+                  )}
+                </div>
+
+                <Group
+                  gap="xs"
+                  wrap="nowrap"
+                  className="collections-page__page-controls"
                 >
-                  {"<"}
-                </ActionIcon>
-                <ActionIcon
-                  radius="sm"
-                  variant="subtle"
-                  aria-label="Next page"
-                  disabled={collectionsPage >= totalPages || isLoading}
-                  onClick={() => setCollectionsPage(collectionsPage + 1)}
-                  className="collections-page__page-control"
-                >
-                  {">"}
-                </ActionIcon>
-              </Group>
+                  <ActionIcon
+                    radius="sm"
+                    variant="subtle"
+                    aria-label="Previous page"
+                    disabled={collectionsPage <= 1 || isLoading}
+                    onClick={() => setCollectionsPage(collectionsPage - 1)}
+                    className="ui-icon-button-template ui-icon-button-template--surface collections-page__page-control"
+                  >
+                    <IconChevronLeft size={16} />
+                  </ActionIcon>
+                  <ActionIcon
+                    radius="sm"
+                    variant="subtle"
+                    aria-label="Next page"
+                    disabled={collectionsPage >= totalPages || isLoading}
+                    onClick={() => setCollectionsPage(collectionsPage + 1)}
+                    className="ui-icon-button-template ui-icon-button-template--surface collections-page__page-control"
+                  >
+                    <IconChevronRight size={16} />
+                  </ActionIcon>
+                </Group>
+              </div>
             </div>
 
             <div className="collections-page__collections-body">
@@ -110,12 +160,7 @@ const Collections: React.FC = () => {
                 </Text>
               )}
               {isLoading ? (
-                <Group
-                  className="collections-page__loading-wrap"
-                  justify="center"
-                >
-                  <Loader size="sm" />
-                </Group>
+                <Loading />
               ) : collections.length > 0 ? (
                 <div className="collections-page__grid">
                   {collections.map((collection) => (
@@ -151,6 +196,36 @@ const Collections: React.FC = () => {
           </Card>
         </div>
       </main>
+
+      <Drawer
+        opened={isAddDrawerOpened}
+        onClose={closeAddDrawer}
+        position="left"
+        size={360}
+        withCloseButton={false}
+        classNames={{
+          content: "collections-page__drawer",
+          body: "collections-page__drawer-body",
+        }}
+      >
+        <div className="collections-page__drawer-header">
+          <Text className="collections-page__drawer-title">Add Collection</Text>
+          <ActionIcon
+            variant="subtle"
+            radius="xs"
+            onClick={closeAddDrawer}
+            className="collections-page__drawer-close"
+          >
+            <IconX size={16} />
+          </ActionIcon>
+        </div>
+
+        <div className="collections-page__drawer-content">
+          <Card className="collections-page__drawer-panel" radius="sm" p="md">
+            <AddCollection onSuccess={handleAddCollectionSuccess} />
+          </Card>
+        </div>
+      </Drawer>
     </section>
   );
 };

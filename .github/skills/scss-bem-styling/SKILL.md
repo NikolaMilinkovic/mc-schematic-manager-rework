@@ -21,12 +21,31 @@ Core rules:
 - Prefer descriptive class names tied to semantics, not visual hacks.
 - Border radius should be compact by default.
 - Prefer one step smaller radius across UI primitives (`sm` over `md` in Mantine) unless UX explicitly needs larger rounding.
+- Prefer existing global SCSS mixins/helpers before adding local one-off styles.
 
 File and import patterns:
 
 - For a component file `Widget.tsx`, prefer sibling style file `Widget.scss`.
 - Import style at top of the component/page entry file.
 - If a shared SCSS partial is needed, use leading underscore naming and import from consuming SCSS file.
+
+Global style modules to reuse first:
+
+- `src/global/colors.scss` → semantic color tokens.
+- `src/global/inputs.scss` → baseline `.ui-input-template` variants.
+- `src/global/buttons.scss` → baseline button/icon-button templates.
+- `src/global/card.scss` → shared card surfaces/elements/buttons.
+- `src/global/side-panel.scss` → shared translucent left-panel shells and panel input styles.
+
+Side panel guidance (new shared API):
+
+- For reusable translucent left cards/filters/details panels, use:
+  - `@include side-panel.side-panel-shell(...)`
+- For full input style inside those panels, use:
+  - `@include side-panel.side-panel-input(...)`
+- For controls that only need panel-matching background (while preserving existing input template behavior), use:
+  - `@include side-panel.side-panel-input-bg(...)`
+- Do not duplicate `color-mix(... var(--bg-surface) 65% ...)` inline when side-panel mixins fit.
 
 Color token policy:
 

@@ -22,7 +22,7 @@ type NavbarProps = {
 };
 
 const defaultItems: NavItem[] = [
-  { label: "Browse Schematics", to: "/" },
+  { label: "Schematics", to: "/" },
   { label: "Collections", to: "/collections" },
   { label: "Upload", to: "/upload-schematic" },
 ];

@@ -27,6 +27,7 @@ type BrowseFiltersProps = {
   onSelectedTagsChange: (tags: string[]) => void;
   onSelectedCollectionIdsChange: (collectionIds: string[]) => void;
   onClearFilters: () => void;
+  forceToggle?: boolean;
 };
 
 function BrowseFilters({
@@ -38,9 +39,15 @@ function BrowseFilters({
   onSelectedTagsChange,
   onSelectedCollectionIdsChange,
   onClearFilters,
+  forceToggle,
 }: BrowseFiltersProps) {
   const isSmallScreen = useMediaQuery("(max-width: 980px)");
+  const showToggle = forceToggle ?? isSmallScreen;
   const [opened, { open, close }] = useDisclosure(false);
+  const hasActiveFilters =
+    searchTerm.trim().length > 0 ||
+    selectedTags.length > 0 ||
+    selectedCollectionIds.length > 0;
 
   const filtersContent = (
     <Paper className="browse-schematics__filters-panel" radius="sm" p="md">
@@ -59,7 +66,9 @@ function BrowseFilters({
             placeholder="Search name or tags"
             radius="sm"
             leftSection={<IconSearch size={16} />}
-            classNames={{ input: "browse-schematics__search-input" }}
+            classNames={{
+              input: "ui-input-template browse-schematics__search-input",
+            }}
           />
         </div>
 
@@ -75,7 +84,7 @@ function BrowseFilters({
             splitChars={[","]}
             clearable
             classNames={{
-              input: "browse-schematics__search-input",
+              input: "ui-input-template browse-schematics__search-input",
               pill: "browse-schematics__tag-pill",
             }}
           />
@@ -96,7 +105,7 @@ function BrowseFilters({
             radius="sm"
             nothingFoundMessage="No collections found"
             classNames={{
-              input: "browse-schematics__search-input",
+              input: "ui-input-template browse-schematics__search-input",
               pill: "browse-schematics__tag-pill",
               dropdown: "browse-schematics__collections-dropdown",
               option: "browse-schematics__collections-option",
@@ -108,7 +117,13 @@ function BrowseFilters({
         <Button
           radius="sm"
           variant="subtle"
-          onClick={onClearFilters}
+          onClick={() => {
+            if (!hasActiveFilters) {
+              return;
+            }
+            onClearFilters();
+          }}
+          disabled={!hasActiveFilters}
           className="browse-schematics__clear-button"
         >
           Clear filters
@@ -117,13 +132,13 @@ function BrowseFilters({
     </Paper>
   );
 
-  if (isSmallScreen) {
+  if (showToggle) {
     return (
       <div className="browse-filters">
         <Button
           variant="subtle"
-          radius="xs"
-          className="browse-filters__toggle"
+          radius="sm"
+          className="ui-button-template ui-button-template--surface browse-filters__toggle"
           leftSection={<IconAdjustmentsHorizontal size={16} />}
           onClick={open}
         >
@@ -145,7 +160,7 @@ function BrowseFilters({
             <Text className="browse-filters__drawer-title">Filters</Text>
             <ActionIcon
               variant="subtle"
-              radius="xs"
+              radius="sm"
               onClick={close}
               className="browse-filters__drawer-close"
             >

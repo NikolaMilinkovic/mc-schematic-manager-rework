@@ -85,7 +85,7 @@
 
   &__field-input {
     border-color: var(--border-default);
-    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    background: var(--bg-elevated);
     color: var(--text-primary);
 
     &:focus,

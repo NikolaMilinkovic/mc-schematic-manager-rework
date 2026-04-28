@@ -1,3 +1,15 @@
+/*
+ * Global animation registry.
+ * Reusable helpers live here and are consumed from component SCSS via:
+ * @use "../global/animations.scss" as animations;
+ *
+ * Shared API:
+ * - Keyframes: page-fade-in
+ * - Utility classes: .page-fade-in, .page-scroll-lock
+ * - Tokens: $ui-interactive-transition-duration, $ui-interactive-transition-easing, $ui-card-hover-transition-duration, $ui-card-hover-transition-easing
+ * - Mixins: interactive-hover-transition($duration, $easing), interactive-card-hover-transition($duration, $easing)
+ */
+
 @keyframes page-fade-in {
   from {
     opacity: 0;
@@ -7,6 +19,86 @@
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
+  }
+}
+
+$ui-interactive-transition-duration: 170ms;
+$ui-interactive-transition-easing: ease;
+$ui-card-hover-transition-duration: 220ms;
+$ui-card-hover-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
+
+@mixin interactive-hover-transition(
+  $duration: $ui-interactive-transition-duration,
+  $easing: $ui-interactive-transition-easing
+) {
+  transition:
+    background-color $duration $easing,
+    color $duration $easing,
+    border-color $duration $easing,
+    box-shadow $duration $easing;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+@mixin interactive-card-hover-transition(
+  $duration: $ui-card-hover-transition-duration,
+  $easing: $ui-card-hover-transition-easing,
+  $hover-y: -2px,
+  $active-y: -1px,
+  $hover-border-color: color-mix(
+      in srgb,
+      var(--accent-primary) 45%,
+      var(--border-default)
+    ),
+  $hover-background: color-mix(
+      in srgb,
+      var(--bg-surface) 88%,
+      var(--accent-primary-soft) 12%
+    ),
+  $hover-box-shadow: 0 10px 22px
+    color-mix(in srgb, var(--accent-primary) 16%, transparent),
+  $focus-border-color: color-mix(
+      in srgb,
+      var(--accent-primary) 52%,
+      var(--border-default)
+    ),
+  $focus-box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--accent-primary) 24%, transparent)
+) {
+  transition:
+    transform $duration $easing,
+    background-color $duration $easing,
+    border-color $duration $easing,
+    box-shadow $duration $easing;
+
+  &:hover {
+    transform: translateY($hover-y);
+    border-color: $hover-border-color;
+    background: $hover-background;
+    box-shadow: $hover-box-shadow;
+  }
+
+  &:focus-within:has(:focus-visible) {
+    border-color: $focus-border-color;
+    box-shadow: $focus-box-shadow;
+  }
+
+  &:active {
+    transform: translateY($active-y);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition:
+      background-color $duration $easing,
+      border-color $duration $easing,
+      box-shadow $duration $easing;
+
+    &:hover,
+    &:active {
+      transform: none;
+    }
   }
 }
 

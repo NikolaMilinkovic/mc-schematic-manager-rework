@@ -1,10 +1,12 @@
 import { createRoot } from "react-dom/client";
-import "./global/colors.scss";
-import "./global/animations.scss";
-import "./index.css";
-import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "react-toastify/dist/ReactToastify.css";
+import "./global/colors.scss";
+import "./global/animations.scss";
+import "./global/buttons.scss";
+import "./global/inputs.scss";
+import "./index.css";
+import { MantineProvider } from "@mantine/core";
 import { BrowserRouter } from "react-router-dom";
 import { appTheme } from "./theme/mantine_theme";
 import { ThemeProvider, useThemeContext } from "./store/theme_context";

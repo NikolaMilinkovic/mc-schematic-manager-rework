@@ -1,0 +1,32 @@
+@use "./animations.scss" as animations;
+
+.ui-button-template {
+  @include animations.interactive-hover-transition();
+  border: 1px solid var(--border-default);
+
+  &--surface {
+    --button-color: var(--text-secondary);
+    --button-hover-color: var(--text-primary);
+    --button-hover: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+  }
+}
+
+.ui-icon-button-template {
+  @include animations.interactive-hover-transition();
+  border: 1px solid var(--border-default);
+
+  &--surface {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+
+    &:hover:not(:disabled) {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+      border-color: var(--border-strong);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+    }
+  }
+}

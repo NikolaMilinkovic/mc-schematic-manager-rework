@@ -1,3 +1,6 @@
+@use "../../global/animations.scss" as animations;
+@use "../../global/side-panel.scss" as side-panel;
+
 .browse-schematics {
   --page-gap: 20px;
   --filters-width: 280px;
@@ -44,8 +47,11 @@
 
   &__filters-panel {
     height: 100%;
-    border: 1px solid var(--border-subtle);
-    background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
+    @include side-panel.side-panel-shell(
+      $surface-opacity: 65%,
+      $border-color: var(--border-subtle),
+      $with-shadow: false
+    );
   }
 
   &__filters-title {
@@ -63,14 +69,7 @@
   }
 
   &__search-input {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    color: var(--text-primary);
-
-    &:focus,
-    &:focus-within {
-      border-color: var(--border-focus);
-    }
+    @include side-panel.side-panel-input-bg();
   }
 
   &__tag-pill {
@@ -128,6 +127,9 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+
+    // Due to card animation we need this
+    padding-top: 2px;
   }
 
   &__content-header {
@@ -141,16 +143,26 @@
     padding-bottom: 10px;
   }
 
+  &__content-header--compact {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+  }
+
+  &__header-left {
+    justify-self: start;
+  }
+
   &__header-actions {
     flex-wrap: wrap;
     justify-content: flex-end;
   }
 
-  &__upload-button {
-    --button-bg: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
-    --button-hover: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
-    --button-color: var(--text-primary);
-    border: 1px solid var(--border-default);
+  &__header-actions--compact {
+    justify-self: end;
+    flex-wrap: nowrap;
   }
 
   &__title {
@@ -159,12 +171,18 @@
     font-weight: 700;
   }
 
+  &__title--compact {
+    justify-self: center;
+    text-align: center;
+  }
+
   &__subtitle {
     color: var(--text-muted);
     font-size: 0.88rem;
   }
 
   &__page-nav-button {
+    --ai-size: 36px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-default);
     color: var(--text-primary);
@@ -177,6 +195,14 @@
     &:disabled {
       opacity: 0.45;
     }
+  }
+
+  &__scroll-top-button {
+    @include animations.interactive-hover-transition();
+    --ai-bg: var(--accent-primary);
+    --ai-hover: var(--accent-primary-hover);
+    color: var(--accent-primary-contrast);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--black) 26%, transparent);
   }
 
   &__status {
@@ -244,8 +270,8 @@
     }
 
     &__header-actions {
-      width: 100%;
-      justify-content: flex-start;
+      width: auto;
+      justify-content: flex-end;
     }
 
     &__grid {

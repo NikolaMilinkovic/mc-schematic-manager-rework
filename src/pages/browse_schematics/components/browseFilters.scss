@@ -1,12 +1,5 @@
 .browse-filters {
-  margin-bottom: 10px;
-
-  &__toggle {
-    --button-color: var(--text-secondary);
-    --button-hover-color: var(--text-primary);
-    --button-hover: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
-    border: 1px solid var(--border-default);
-  }
+  margin-bottom: 0;
 
   &__drawer {
     background: var(--bg-surface);

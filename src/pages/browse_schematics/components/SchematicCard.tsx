@@ -1,4 +1,11 @@
-import { memo, useEffect, useRef, useState } from "react";
+import {
+  memo,
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   Card,
@@ -12,6 +19,7 @@ import { IconDownload, IconEdit, IconTrash } from "@tabler/icons-react";
 import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
 import ActionConfirmModal from "../../../components/actionConfirmModal/ActionConfirmModal";
+import SchematicRendererDemoLauncher from "../../../../Examples/demo/schematic-renderer/SchematicRendererDemoLauncher";
 import type { Schematic } from "../../../store/schematic_store";
 import { selectActiveUser, useUserStore } from "../../../store/user_store";
 import {
@@ -110,7 +118,7 @@ function SchematicCard({
     }
   }
 
-  async function handleCopySchematicString() {
+  async function handleGetSchematic() {
     setIsBusy(true);
     try {
       const copiedSchematic = await copySchematicStringAction(schematic._id);
@@ -123,6 +131,32 @@ function SchematicCard({
     } finally {
       setIsBusy(false);
     }
+  }
+
+  function handleCardClick(event: MouseEvent<HTMLDivElement>) {
+    if (!canGetSchematic || isBusy) {
+      return;
+    }
+
+    const target = event.target;
+    if (target instanceof Element && target.closest("button, a")) {
+      return;
+    }
+
+    void handleGetSchematic();
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (!canGetSchematic || isBusy) {
+      return;
+    }
+
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    void handleGetSchematic();
   }
 
   async function handleDeleteSchematic() {
@@ -179,7 +213,7 @@ function SchematicCard({
   }
 
   return (
-    <Card className="schematic-card" radius="sm" p="md">
+    <>
       <ActionConfirmModal
         opened={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -193,106 +227,135 @@ function SchematicCard({
         confirmLabel={isDeleteMode ? "Delete" : "Remove"}
         isLoading={isBusy}
       />
+      <Card
+        className={`schematic-card${canGetSchematic ? " schematic-card--clickable" : ""}`}
+        radius="sm"
+        p="md"
+        onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
+        role={canGetSchematic ? "button" : undefined}
+        tabIndex={canGetSchematic ? 0 : undefined}
+      >
+        <Text className="schematic-card__title">{schematic.name}</Text>
 
-      <Text className="schematic-card__title">{schematic.name}</Text>
-
-      <div className="schematic-card__image-wrap">
-        {!imageVisible && hasBlurHash && (
-          <div className="schematic-card__blurhash" aria-hidden="true">
-            <Blurhash
-              hash={blurHash}
-              width={blurWidth}
-              height={blurHeight}
-              resolutionX={32}
-              resolutionY={32}
-              punch={1}
+        <div className="schematic-card__image-wrap">
+          {!imageVisible && hasBlurHash && (
+            <div className="schematic-card__blurhash" aria-hidden="true">
+              <Blurhash
+                hash={blurHash}
+                width={blurWidth}
+                height={blurHeight}
+                resolutionX={32}
+                resolutionY={32}
+                punch={1}
+              />
+            </div>
+          )}
+          {!imageVisible && !hasBlurHash && (
+            <Skeleton className="schematic-card__image-skeleton" />
+          )}
+          {schematic.image?.url ? (
+            <Image
+              src={schematic.image.url}
+              alt={`${schematic.name} preview`}
+              className={`schematic-card__image${imageVisible ? " schematic-card__image--loaded" : ""}`}
+              onLoad={handleImageLoad}
+              radius="xs"
+              loading="lazy"
             />
-          </div>
-        )}
-        {!imageVisible && !hasBlurHash && (
-          <Skeleton className="schematic-card__image-skeleton" />
-        )}
-        {schematic.image?.url ? (
-          <Image
-            src={schematic.image.url}
-            alt={`${schematic.name} preview`}
-            className={`schematic-card__image${imageVisible ? " schematic-card__image--loaded" : ""}`}
-            onLoad={handleImageLoad}
-            radius="xs"
-            loading="lazy"
-          />
-        ) : (
-          <div className="schematic-card__image-placeholder">
-            No preview image
-          </div>
-        )}
-      </div>
-
-      <Stack gap={8} mt="sm" className="schematic-card__actions">
-        {canGetSchematic && (
-          <Button
-            radius="xs"
-            variant="subtle"
-            onClick={handleCopySchematicString}
-            loading={isBusy}
-            className="schematic-card__button schematic-card__button--get"
-          >
-            {copied ? "Copied to clipboard" : "Get schematic"}
-          </Button>
-        )}
-
-        <Group grow gap={8}>
-          {canEditSchematic && (
-            <Button
-              radius="xs"
-              variant="subtle"
-              component={Link}
-              to={`/edit-schematic/${schematic._id}`}
-              className="schematic-card__button schematic-card__button--muted"
-            >
-              <IconEdit size={15} />
-            </Button>
+          ) : (
+            <div className="schematic-card__image-placeholder">
+              No preview image
+            </div>
           )}
-          {canDownloadSchematic && (
+        </div>
+
+        <Stack gap={8} mt="sm" className="schematic-card__actions">
+          {canGetSchematic && (
             <Button
               radius="xs"
               variant="subtle"
-              onClick={handleDownload}
+              onClick={(event) => {
+                event.stopPropagation();
+                void handleGetSchematic();
+              }}
               loading={isBusy}
-              className="schematic-card__button schematic-card__button--muted"
+              className="schematic-card__button schematic-card__button--get"
             >
-              <IconDownload size={15} />
+              {copied ? "Copied to clipboard" : "Get schematic"}
             </Button>
           )}
-          {canRemoveSchematic && (
+
+          <SchematicRendererDemoLauncher
+            schematicId={schematic._id}
+            schematicName={schematic.name}
+          />
+
+          <Group grow gap={8}>
+            {canEditSchematic && (
+              <Button
+                radius="xs"
+                variant="subtle"
+                component={Link}
+                to={`/edit-schematic/${schematic._id}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                className="schematic-card__button schematic-card__button--muted"
+              >
+                <IconEdit size={15} />
+              </Button>
+            )}
+            {canDownloadSchematic && (
+              <Button
+                radius="xs"
+                variant="subtle"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void handleDownload();
+                }}
+                loading={isBusy}
+                className="schematic-card__button schematic-card__button--muted"
+              >
+                <IconDownload size={15} />
+              </Button>
+            )}
+            {canRemoveSchematic && (
+              <Button
+                radius="xs"
+                variant="subtle"
+                color="red"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openConfirm("delete");
+                }}
+                disabled={isBusy}
+                className="schematic-card__button schematic-card__button--danger"
+              >
+                <IconTrash size={15} />
+              </Button>
+            )}
+          </Group>
+
+          {collectionId && canRemoveSchematic && (
             <Button
               radius="xs"
               variant="subtle"
               color="red"
-              onClick={() => openConfirm("delete")}
+              leftSection={<IconTrash size={15} />}
+              onClick={(event) => {
+                event.stopPropagation();
+                openConfirm("remove");
+              }}
               disabled={isBusy}
               className="schematic-card__button schematic-card__button--danger"
             >
-              <IconTrash size={15} />
+              Remove from collection
             </Button>
           )}
-        </Group>
-
-        {collectionId && canRemoveSchematic && (
-          <Button
-            radius="xs"
-            variant="subtle"
-            color="red"
-            leftSection={<IconTrash size={15} />}
-            onClick={() => openConfirm("remove")}
-            disabled={isBusy}
-            className="schematic-card__button schematic-card__button--danger"
-          >
-            Remove from collection
-          </Button>
-        )}
-      </Stack>
-    </Card>
+        </Stack>
+      </Card>
+    </>
   );
 }
 

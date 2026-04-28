@@ -52,7 +52,7 @@ function ActionConfirmModal({
         <Group grow className="action-confirm-modal__actions">
           <Button
             radius="xs"
-            variant="subtle"
+            variant="outline"
             onClick={onClose}
             disabled={isLoading}
             className="action-confirm-modal__button action-confirm-modal__button--cancel"
@@ -61,7 +61,7 @@ function ActionConfirmModal({
           </Button>
           <Button
             radius="xs"
-            variant="subtle"
+            variant="outline"
             onClick={onConfirm}
             loading={isLoading}
             className="action-confirm-modal__button action-confirm-modal__button--danger"

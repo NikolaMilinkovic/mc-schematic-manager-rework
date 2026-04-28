@@ -46,15 +46,17 @@
 
     &--cancel {
       --button-color: var(--text-secondary);
-      --button-hover-color: var(--text-secondary);
+      --button-hover-color: var(--text-primary);
+      --button-bg: var(--bg-surface);
       --button-hover: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
       border: 1px solid var(--border-default);
     }
 
     &--danger {
-      --button-color: var(--danger);
-      --button-hover-color: var(--danger);
-      --button-hover: color-mix(in srgb, var(--danger) 10%, transparent);
+      --button-bg: transparent;
+      --button-hover: color-mix(in srgb, var(--danger) 24%, transparent);
+      --button-color: var(--white);
+      --button-hover-color: var(--white);
       border: 1px solid var(--border-danger);
     }
   }

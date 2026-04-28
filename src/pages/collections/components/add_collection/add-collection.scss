@@ -1,3 +1,5 @@
+@use "../../../../global/side-panel.scss" as side-panel;
+
 .add-collection-panel {
   display: flex;
   flex-direction: column;
@@ -25,14 +27,15 @@
   }
 
   &__field-input {
-    border-color: var(--border-default);
-    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
-    color: var(--text-primary);
+    @include side-panel.side-panel-input();
+  }
 
-    &:focus,
-    &:focus-within {
-      border-color: var(--border-focus);
-    }
+  .img-input__trigger {
+    @include side-panel.side-panel-input-bg();
+  }
+
+  .tags-input__input {
+    @include side-panel.side-panel-input-bg();
   }
 
   &__button {

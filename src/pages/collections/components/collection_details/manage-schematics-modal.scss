@@ -105,6 +105,11 @@
     &--selected {
       border-color: var(--accent-primary);
       background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+
+      &:hover {
+        border-color: var(--danger-hover);
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
+      }
     }
   }
 

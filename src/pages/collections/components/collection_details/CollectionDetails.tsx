@@ -4,10 +4,10 @@ import {
   Badge,
   Button,
   Card,
+  Drawer,
   FileButton,
   Group,
   Image,
-  Loader,
   Pagination,
   Stack,
   TagsInput,
@@ -15,12 +15,17 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
+  IconAdjustmentsHorizontal,
   IconArrowLeft,
+  IconChevronLeft,
+  IconChevronRight,
   IconDeviceFloppy,
   IconPhoto,
   IconSearch,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionConfirmModal from "../../../../components/actionConfirmModal/ActionConfirmModal";
@@ -33,6 +38,7 @@ import { buildCollectionUpdateFormData } from "./methods/buildCollectionUpdateFo
 import { getCollectionFormValues } from "./methods/getCollectionFormValues";
 import { validateCollectionForm } from "./methods/validateCollectionForm";
 import "./collectionDetails.scss";
+import Loading from "../../../../components/loading/Loading";
 
 function CollectionDetails() {
   const navigate = useNavigate();
@@ -78,6 +84,9 @@ function CollectionDetails() {
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const [createSchematicOpen, setCreateSchematicOpen] = useState(false);
   const [addSchematicsOpen, setAddSchematicsOpen] = useState(false);
+  const [sidebarOpened, { open: openSidebar, close: closeSidebar }] =
+    useDisclosure(false);
+  const isCompactLayout = useMediaQuery("(max-width: 980px)");
   const totalPages = Math.max(
     1,
     Math.ceil(activeCollectionTotalCount / activeCollectionPageSize),
@@ -152,7 +161,162 @@ function CollectionDetails() {
     };
   }, [imageFile]);
 
+  useEffect(() => {
+    if (!isCompactLayout) {
+      closeSidebar();
+    }
+  }, [closeSidebar, isCompactLayout]);
+
   const collectionSchematics = activeCollection?.schematics ?? [];
+
+  function renderEditorCard(collection: NonNullable<typeof activeCollection>) {
+    return (
+      <Card
+        className={`collection-details__editor-card${
+          isCompactLayout ? " collection-details__editor-card--sidebar" : ""
+        }`}
+        radius="sm"
+        p="lg"
+      >
+        <div className="collection-details__editor-header">
+          <ActionIcon
+            radius="sm"
+            variant="subtle"
+            aria-label="Back to collections"
+            className="collection-details__back-button"
+            onClick={() => navigate("/collections")}
+          >
+            <IconArrowLeft size={18} />
+          </ActionIcon>
+
+          <div className="collection-details__editor-heading">
+            <Title order={1} className="collection-details__editor-title">
+              {collection.name}
+            </Title>
+          </div>
+        </div>
+        <Group gap="xs" className="collection-details__editor-meta">
+          <Badge
+            radius="sm"
+            variant="light"
+            className="collection-details__badge"
+          >
+            {activeCollectionTotalCount} schematics
+          </Badge>
+          <Badge
+            radius="sm"
+            variant="light"
+            className="collection-details__badge"
+          >
+            {collection.tags.length} tags
+          </Badge>
+        </Group>
+
+        <form className="collection-details__form" onSubmit={handleSaveChanges}>
+          <div className="collection-details__form-grid">
+            <div className="collection-details__preview-column">
+              <FileButton accept="image/*" onChange={setImageFile}>
+                {(buttonProps) => (
+                  <button
+                    type="button"
+                    {...buttonProps}
+                    className="collection-details__preview-trigger"
+                    aria-label="Choose new image"
+                  >
+                    <div className="collection-details__preview-shell">
+                      {imagePreview ? (
+                        <Image
+                          src={imagePreview}
+                          alt={`${collection.name} preview`}
+                          className="collection-details__preview-image"
+                          radius="sm"
+                        />
+                      ) : (
+                        <div className="collection-details__preview-empty">
+                          <IconPhoto size={28} />
+                          <Text>No preview image</Text>
+                        </div>
+                      )}
+                      <span className="collection-details__preview-caption">
+                        Click to change image
+                      </span>
+                    </div>
+                  </button>
+                )}
+              </FileButton>
+            </div>
+
+            <div className="collection-details__fields-column">
+              <Stack gap="md">
+                <TextInput
+                  label="Collection name"
+                  placeholder="Collection name"
+                  value={name}
+                  onChange={(event) => setName(event.currentTarget.value)}
+                  radius="sm"
+                  classNames={{
+                    label: "collection-details__field-label",
+                    input: "collection-details__field-input ui-input-template",
+                  }}
+                />
+
+                <TagsInput
+                  label="Tags"
+                  placeholder="Add tags"
+                  value={tags}
+                  onChange={setTags}
+                  radius="sm"
+                  splitChars={[","]}
+                  classNames={{
+                    label: "collection-details__field-label",
+                    input: "collection-details__field-input ui-input-template",
+                    inputField: "collection-details__field-input-field",
+                    pillsList: "collection-details__tags-pills-list",
+                    pill: "collection-details__tag-pill",
+                    dropdown: "collection-details__field-dropdown",
+                    option: "collection-details__field-option",
+                  }}
+                />
+
+                {detailError && (
+                  <Text className="collection-details__error-text">
+                    {detailError}
+                  </Text>
+                )}
+
+                <Group
+                  grow
+                  wrap="nowrap"
+                  className="collection-details__form-actions"
+                >
+                  <Button
+                    type="submit"
+                    radius="sm"
+                    leftSection={<IconDeviceFloppy size={16} />}
+                    loading={isSubmitting}
+                    className="collection-details__action-button"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    radius="sm"
+                    variant="default"
+                    leftSection={<IconTrash size={16} />}
+                    onClick={() => setRemoveConfirmOpen(true)}
+                    disabled={isSubmitting}
+                    className="collection-details__action-button collection-details__action-button--danger"
+                  >
+                    Remove
+                  </Button>
+                </Group>
+              </Stack>
+            </div>
+          </div>
+        </form>
+      </Card>
+    );
+  }
 
   async function handleSaveChanges(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -214,14 +378,7 @@ function CollectionDetails() {
           <div className="collection-details__glow collection-details__glow--right" />
           <div className="collection-details__glow collection-details__glow--left" />
         </div>
-        <div className="collection-details__frame">
-          <div className="collection-details__status-card">
-            <Loader size="sm" />
-            <Text className="collection-details__status-text">
-              Loading collection...
-            </Text>
-          </div>
-        </div>
+        <Loading />
       </section>
     );
   }
@@ -269,6 +426,8 @@ function CollectionDetails() {
     );
   }
 
+  const collection = activeCollection;
+
   return (
     <section className="collection-details page-fade-in">
       <div className="collection-details__background" aria-hidden="true">
@@ -302,8 +461,8 @@ function CollectionDetails() {
             });
           }}
           preselectedCollection={{
-            collection_id: activeCollection._id,
-            collection_name: activeCollection.name,
+            collection_id: collection._id,
+            collection_name: collection.name,
           }}
         />
         <ManageSchematicsModal
@@ -326,152 +485,40 @@ function CollectionDetails() {
             (schematic) => schematic._id,
           )}
         />
+        <Drawer
+          opened={sidebarOpened}
+          onClose={closeSidebar}
+          position="left"
+          size={380}
+          withCloseButton={false}
+          classNames={{
+            content: "collection-details__drawer",
+            body: "collection-details__drawer-body",
+          }}
+        >
+          <div className="collection-details__drawer-header">
+            <Text className="collection-details__drawer-title">
+              Collection Details
+            </Text>
+            <ActionIcon
+              variant="subtle"
+              radius="sm"
+              onClick={closeSidebar}
+              className="collection-details__drawer-close"
+              aria-label="Close collection details"
+            >
+              <IconX size={16} />
+            </ActionIcon>
+          </div>
+
+          <div className="collection-details__drawer-content">
+            {renderEditorCard(collection)}
+          </div>
+        </Drawer>
 
         <main className="collection-details__content">
           <div className="collection-details__layout">
-            <Card
-              className="collection-details__editor-card"
-              radius="sm"
-              p="lg"
-            >
-              <div className="collection-details__editor-header">
-                <ActionIcon
-                  radius="sm"
-                  variant="subtle"
-                  aria-label="Back to collections"
-                  className="collection-details__back-button"
-                  onClick={() => navigate("/collections")}
-                >
-                  <IconArrowLeft size={18} />
-                </ActionIcon>
-
-                <div className="collection-details__editor-heading">
-                  <Title order={1} className="collection-details__editor-title">
-                    {activeCollection.name}
-                  </Title>
-                </div>
-              </div>
-              <Group gap="xs" className="collection-details__editor-meta">
-                <Badge
-                  radius="sm"
-                  variant="light"
-                  className="collection-details__badge"
-                >
-                  {activeCollectionTotalCount} schematics
-                </Badge>
-                <Badge
-                  radius="sm"
-                  variant="light"
-                  className="collection-details__badge"
-                >
-                  {activeCollection.tags.length} tags
-                </Badge>
-              </Group>
-
-              <form
-                className="collection-details__form"
-                onSubmit={handleSaveChanges}
-              >
-                <div className="collection-details__form-grid">
-                  <div className="collection-details__preview-column">
-                    <FileButton accept="image/*" onChange={setImageFile}>
-                      {(buttonProps) => (
-                        <button
-                          type="button"
-                          {...buttonProps}
-                          className="collection-details__preview-trigger"
-                          aria-label="Choose new image"
-                        >
-                          <div className="collection-details__preview-shell">
-                            {imagePreview ? (
-                              <Image
-                                src={imagePreview}
-                                alt={`${activeCollection.name} preview`}
-                                className="collection-details__preview-image"
-                                radius="sm"
-                              />
-                            ) : (
-                              <div className="collection-details__preview-empty">
-                                <IconPhoto size={28} />
-                                <Text>No preview image</Text>
-                              </div>
-                            )}
-                            <span className="collection-details__preview-caption">
-                              Click to change image
-                            </span>
-                          </div>
-                        </button>
-                      )}
-                    </FileButton>
-                  </div>
-
-                  <div className="collection-details__fields-column">
-                    <Stack gap="md">
-                      <TextInput
-                        label="Collection name"
-                        placeholder="Collection name"
-                        value={name}
-                        onChange={(event) => setName(event.currentTarget.value)}
-                        radius="sm"
-                        classNames={{
-                          label: "collection-details__field-label",
-                          input: "collection-details__field-input",
-                        }}
-                      />
-
-                      <TagsInput
-                        label="Tags"
-                        placeholder="Add tags"
-                        value={tags}
-                        onChange={setTags}
-                        radius="sm"
-                        splitChars={[","]}
-                        classNames={{
-                          label: "collection-details__field-label",
-                          input: "collection-details__field-input",
-                          pill: "collection-details__tag-pill",
-                          dropdown: "collection-details__field-dropdown",
-                          option: "collection-details__field-option",
-                        }}
-                      />
-
-                      {detailError && (
-                        <Text className="collection-details__error-text">
-                          {detailError}
-                        </Text>
-                      )}
-
-                      <Group
-                        grow
-                        wrap="nowrap"
-                        className="collection-details__form-actions"
-                      >
-                        <Button
-                          type="submit"
-                          radius="sm"
-                          leftSection={<IconDeviceFloppy size={16} />}
-                          loading={isSubmitting}
-                          className="collection-details__action-button"
-                        >
-                          Save changes
-                        </Button>
-                        <Button
-                          type="button"
-                          radius="sm"
-                          variant="default"
-                          leftSection={<IconTrash size={16} />}
-                          onClick={() => setRemoveConfirmOpen(true)}
-                          disabled={isSubmitting}
-                          className="collection-details__action-button collection-details__action-button--danger"
-                        >
-                          Remove collection
-                        </Button>
-                      </Group>
-                    </Stack>
-                  </div>
-                </div>
-              </form>
-            </Card>
+            {!isCompactLayout && renderEditorCard(collection)}
 
             <Card
               className="collection-details__schematics-card"
@@ -479,67 +526,109 @@ function CollectionDetails() {
               p="lg"
             >
               <div className="collection-details__schematics-header">
-                <div className="collection-details__schematics-actions">
-                  <Button
+                {isCompactLayout && (
+                  <div className="collection-details__schematics-title-wrap">
+                    <Title
+                      order={2}
+                      className="collection-details__schematics-title"
+                    >
+                      {collection.name}
+                    </Title>
+                  </div>
+                )}
+
+                <div className="collection-details__schematics-toolbar">
+                  <div className="collection-details__schematics-actions">
+                    {isCompactLayout && (
+                      <>
+                        <ActionIcon
+                          radius="sm"
+                          variant="subtle"
+                          aria-label="Back to collections"
+                          onClick={() => navigate("/collections")}
+                          className="ui-icon-button-template ui-icon-button-template--transparent collection-details__schematics-action collection-details__schematics-back-button"
+                        >
+                          <IconArrowLeft size={18} />
+                        </ActionIcon>
+                        <Button
+                          radius="sm"
+                          variant="subtle"
+                          leftSection={<IconAdjustmentsHorizontal size={16} />}
+                          onClick={openSidebar}
+                          className="ui-button-template ui-button-template--surface collection-details__schematics-action collection-details__schematics-action--sidebar"
+                        >
+                          Details
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      radius="sm"
+                      variant="subtle"
+                      onClick={() => setCreateSchematicOpen(true)}
+                      className="ui-button-template ui-button-template--surface collection-details__schematics-action collection-details__schematics-action--upload"
+                    >
+                      Upload
+                    </Button>
+                    <Button
+                      radius="sm"
+                      variant="subtle"
+                      onClick={() => setAddSchematicsOpen(true)}
+                      className="ui-button-template ui-button-template--surface collection-details__schematics-action collection-details__schematics-action--manage"
+                    >
+                      Manage
+                    </Button>
+                  </div>
+
+                  <TextInput
+                    value={draftSearchValue}
+                    onChange={(event) =>
+                      setDraftSearchValue(event.currentTarget.value)
+                    }
+                    placeholder="Search schematics or tags"
                     radius="sm"
-                    variant="default"
-                    onClick={() => setCreateSchematicOpen(true)}
-                    className="collection-details__schematics-action collection-details__schematics-action--upload"
+                    leftSection={<IconSearch size={16} />}
+                    className="collection-details__search-field"
+                    classNames={{
+                      input:
+                        "collection-details__search-input ui-input-template ui-input-template--transparent",
+                    }}
+                  />
+
+                  <Group
+                    gap="xs"
+                    wrap="nowrap"
+                    className="collection-details__page-controls"
                   >
-                    Upload Schematic
-                  </Button>
-                  <Button
-                    radius="sm"
-                    variant="default"
-                    onClick={() => setAddSchematicsOpen(true)}
-                    className="collection-details__schematics-action collection-details__schematics-action--manage"
-                  >
-                    Manage Schematics
-                  </Button>
+                    <ActionIcon
+                      size="input-sm"
+                      radius="sm"
+                      variant="default"
+                      aria-label="Previous page"
+                      disabled={activeCollectionPage <= 1 || isDetailLoading}
+                      onClick={() =>
+                        setActiveCollectionPage(activeCollectionPage - 1)
+                      }
+                      className="collection-details__page-control"
+                    >
+                      <IconChevronLeft size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      size="input-sm"
+                      radius="sm"
+                      variant="default"
+                      aria-label="Next page"
+                      disabled={
+                        activeCollectionPage >= totalPages || isDetailLoading
+                      }
+                      onClick={() =>
+                        setActiveCollectionPage(activeCollectionPage + 1)
+                      }
+                      className="collection-details__page-control"
+                    >
+                      <IconChevronRight size={16} />
+                    </ActionIcon>
+                  </Group>
                 </div>
-
-                <TextInput
-                  value={draftSearchValue}
-                  onChange={(event) =>
-                    setDraftSearchValue(event.currentTarget.value)
-                  }
-                  placeholder="Search schematics or tags"
-                  radius="sm"
-                  leftSection={<IconSearch size={16} />}
-                  className="collection-details__search-field"
-                  classNames={{
-                    input: "collection-details__search-input",
-                  }}
-                />
-
-                <Group gap="xs" wrap="nowrap">
-                  <ActionIcon
-                    radius="sm"
-                    variant="subtle"
-                    aria-label="Previous page"
-                    disabled={activeCollectionPage <= 1 || isDetailLoading}
-                    onClick={() =>
-                      setActiveCollectionPage(activeCollectionPage - 1)
-                    }
-                    className="collection-details__page-control"
-                  >
-                    {"<"}
-                  </ActionIcon>
-                  <ActionIcon
-                    radius="sm"
-                    variant="subtle"
-                    aria-label="Next page"
-                    disabled={
-                      activeCollectionPage >= totalPages || isDetailLoading
-                    }
-                    onClick={() =>
-                      setActiveCollectionPage(activeCollectionPage + 1)
-                    }
-                    className="collection-details__page-control"
-                  >
-                    {">"}
-                  </ActionIcon>
-                </Group>
               </div>
 
               <div className="collection-details__schematics-body">
@@ -549,7 +638,7 @@ function CollectionDetails() {
                       <SchematicCard
                         key={schematic._id}
                         schematic={schematic}
-                        collectionId={activeCollection._id}
+                        collectionId={collection._id}
                         onRemoved={removeSchematicFromActiveCollection}
                       />
                     ))}

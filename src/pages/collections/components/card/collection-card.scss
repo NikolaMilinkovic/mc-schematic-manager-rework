@@ -1,10 +1,10 @@
+@use "../../../../global/animations.scss" as animations;
+@use "../../../../global/card.scss" as card;
+
 .collection-card {
-  border: 1px solid var(--border-default);
-  background: color-mix(in srgb, var(--bg-surface) 95%, transparent);
-  display: flex;
-  flex-direction: column;
-  min-width: 230px;
-  width: 100%;
+  @include card.card-base();
+  @include animations.interactive-card-hover-transition();
+
   cursor: pointer;
 
   &__title {
@@ -20,45 +20,23 @@
   }
 
   &__image-wrap {
-    position: relative;
-    min-height: 180px;
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    overflow: hidden;
-    background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
+    @include card.card-image-wrap();
   }
 
   &__image-skeleton {
-    position: absolute;
-    inset: 0;
+    @include card.card-image-skeleton();
   }
 
   &__blurhash {
-    position: absolute;
-    inset: 0;
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-    }
+    @include card.card-blurhash();
   }
 
   &__image {
-    height: 180px;
-    object-fit: cover;
-    // opacity: 0 !important;
-    transition: opacity 200ms ease;
-    &--loaded {
-      opacity: 1;
-    }
+    @include card.card-image();
   }
 
   &__image-placeholder {
-    min-height: 180px;
-    display: grid;
-    place-items: center;
-    color: var(--text-muted);
-    font-size: 0.84rem;
+    @include card.card-image-placeholder();
   }
 
   &__tags-wrap {
@@ -74,13 +52,7 @@
   }
 
   &__tag {
-    border: 1px solid var(--border-accent);
-    background: color-mix(in srgb, var(--accent-primary-soft) 32%, transparent);
-    color: var(--text-primary);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 0.72rem;
-    line-height: 1;
+    @include card.card-tag();
   }
 
   &__updated-at {
@@ -99,7 +71,8 @@
   }
 
   &__button {
-    border-radius: 6px;
+    @include card.card-button-base();
+
     cursor: pointer;
     min-width: 0;
     padding-inline: 0;
@@ -109,22 +82,11 @@
     }
 
     &--edit {
-      --button-color: var(--accent-primary);
-      --button-hover-color: var(--accent-primary);
-      --button-hover: color-mix(
-        in srgb,
-        var(--accent-primary) 12%,
-        transparent
-      );
-      border: 1px solid var(--border-accent);
-      color: var(--text-primary);
+      @include card.card-button-edit();
     }
 
     &--danger {
-      --button-color: var(--danger);
-      --button-hover-color: var(--danger);
-      --button-hover: color-mix(in srgb, var(--danger) 10%, transparent);
-      border: 1px solid var(--border-danger);
+      @include card.card-button-danger();
     }
   }
 }
