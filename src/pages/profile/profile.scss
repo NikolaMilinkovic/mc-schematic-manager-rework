@@ -1,0 +1,190 @@
+@use "../../global/animations.scss" as animations;
+
+.authenticated-page-background.profile-page {
+  height: calc(100vh - 68px);
+  min-height: calc(100vh - 68px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  place-items: start center;
+  align-content: start;
+}
+
+@supports (height: 100dvh) {
+  .authenticated-page-background.profile-page {
+    height: calc(100dvh - 68px);
+    min-height: calc(100dvh - 68px);
+  }
+}
+
+.profile-page {
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: min(980px, 100%);
+    margin: 0 auto;
+  }
+
+  &__card {
+    border: 1px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-surface) 65%, transparent);
+  }
+
+  &__heading-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__title {
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+  }
+
+  &__subtitle {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+  }
+
+  &__profile-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  &__avatar-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__avatar {
+    width: 220px;
+    height: 220px;
+    border: 1px solid var(--border-default);
+    background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
+    color: var(--text-secondary);
+    font-size: 2.1rem;
+    font-weight: 700;
+    overflow: hidden;
+  }
+
+  &__avatar-hint {
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  &__avatar-upload {
+    width: 100%;
+    max-width: 220px;
+  }
+
+  &__form {
+    width: 100%;
+  }
+
+  &__field-label {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+  }
+
+  &__field-input {
+    background: color-mix(
+      in srgb,
+      var(--bg-elevated) 70%,
+      transparent
+    ) !important;
+  }
+
+  &__divider {
+    margin-top: 8px;
+    margin-bottom: 2px;
+
+    .mantine-Divider-label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+  }
+
+  &__submit {
+    @include animations.interactive-hover-transition();
+    min-width: 160px;
+    border: 1px solid var(--border-accent);
+    background: color-mix(in srgb, var(--accent-primary) 70%, transparent);
+    color: var(--accent-primary-contrast);
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled),
+    &:active:not(:disabled) {
+      background: color-mix(
+        in srgb,
+        var(--accent-primary-hover) 76%,
+        transparent
+      );
+      color: var(--accent-primary-contrast);
+    }
+  }
+
+  &__section-title {
+    color: var(--text-primary);
+  }
+
+  &__manager-note {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    font-size: 0.92rem;
+  }
+
+  &__stat-row {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--bg-elevated) 62%, transparent);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__stat-label {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+
+  &__stat-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 860px) {
+  .profile-page {
+    &__profile-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    &__avatar-column {
+      align-items: stretch;
+    }
+
+    &__avatar {
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 1 / 1;
+      align-self: center;
+    }
+
+    &__avatar-upload {
+      max-width: 280px;
+      align-self: center;
+    }
+  }
+}

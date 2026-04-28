@@ -1,0 +1,96 @@
+@use "../../../../global/animations.scss" as animations;
+
+.studio-user-card {
+  border: 1px solid var(--border-default);
+  background: color-mix(in srgb, var(--bg-surface) 66%, transparent);
+
+  &__header {
+    border-radius: 6px;
+
+    &--clickable {
+      @include animations.interactive-hover-transition();
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        background: color-mix(in srgb, var(--bg-elevated) 62%, transparent);
+      }
+    }
+  }
+
+  &--collapsed {
+    @include animations.interactive-hover-transition();
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--border-strong);
+      background: color-mix(in srgb, var(--bg-surface) 74%, transparent);
+    }
+  }
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    color: var(--text-primary);
+  }
+
+  &__toggle-icon {
+    color: var(--text-muted);
+    transform: rotate(0deg);
+    transition: transform 170ms ease;
+
+    &[data-opened="true"] {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__toggle-text {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.93rem;
+    line-height: 1.2;
+  }
+
+  &__remove {
+    border: 1px solid var(--border-danger);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled),
+    &:active:not(:disabled) {
+      background: color-mix(in srgb, var(--danger) 16%, transparent);
+      color: var(--danger);
+    }
+  }
+
+  &__content {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+  }
+
+  &__field-label {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+  }
+
+  &__field-input {
+    background: color-mix(
+      in srgb,
+      var(--bg-elevated) 72%,
+      transparent
+    ) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-user-card {
+    &__toggle-icon {
+      transition: none;
+    }
+  }
+}

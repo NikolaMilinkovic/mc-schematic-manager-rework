@@ -1,0 +1,9 @@
+.studio-users-list {
+  &__empty {
+    border: 1px dashed var(--border-default);
+    border-radius: 6px;
+    padding: 14px;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--bg-elevated) 45%, transparent);
+  }
+}

@@ -1,18 +1,58 @@
+@use "../../global/side-panel.scss" as side-panel;
+
 .upload-schematic {
   &__content {
     width: 100%;
-    max-width: 680px;
+    max-width: 1320px;
     margin-inline: auto;
   }
 
   &__form {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
+    @include side-panel.side-panel-shell(
+      $surface-opacity: 65%,
+      $border-color: var(--border-subtle),
+      $with-shadow: false
+    );
     border-radius: 6px;
     padding: 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    max-height: calc(100vh - 8rem);
+    overflow-y: hidden;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+
+  &__form-header {
+    background: transparent;
+    flex: 0 0 auto;
+  }
+
+  &__card-content {
+    align-items: start;
+    display: grid;
+    flex: 1 1 auto;
+    column-gap: 1rem;
+    row-gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.35rem;
+  }
+
+  &__fields {
+    min-width: 0;
+  }
+
+  &__preview {
+    min-height: fit-content;
+    min-width: 0;
+    width: 100%;
+    align-self: start;
+    position: sticky;
+    top: 0;
   }
 
   &__title {
@@ -25,7 +65,7 @@
   &__hint {
     color: var(--text-muted);
     font-size: 0.84rem;
-    margin-top: -0.5rem;
+    margin-top: 0.45rem;
   }
 
   &__field-label {
@@ -38,15 +78,8 @@
   }
 
   &__field-input {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    color: var(--text-primary);
+    @include side-panel.side-panel-input();
     border-radius: 4px;
-
-    &:focus,
-    &:focus-within {
-      border-color: var(--border-focus);
-    }
   }
 
   &__submit {
@@ -67,6 +100,23 @@
     &:active {
       background: var(--accent-primary-active);
       transform: scale(0.98);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    &__form {
+      max-height: calc(100vh - 6rem);
+      padding: 1.25rem;
+    }
+
+    &__card-content {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    &__preview {
+      min-height: fit-content;
+      position: static;
     }
   }
 }

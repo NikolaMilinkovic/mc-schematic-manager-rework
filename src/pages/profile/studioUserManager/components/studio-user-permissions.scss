@@ -1,0 +1,32 @@
+@use "../../../../global/animations.scss" as animations;
+
+.studio-user-permissions {
+  &__divider {
+    border-color: var(--border-subtle);
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  &__section {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 10px;
+    background: color-mix(in srgb, var(--bg-elevated) 58%, transparent);
+  }
+
+  &__title {
+    color: var(--text-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  &__checkbox {
+    @include animations.interactive-hover-transition();
+  }
+
+  &__checkbox-label {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+  }
+}

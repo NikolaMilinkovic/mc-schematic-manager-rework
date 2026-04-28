@@ -79,6 +79,22 @@
     margin-top: -0.2rem;
   }
 
+  &__layout {
+    align-items: start;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  &__fields {
+    min-width: 0;
+  }
+
+  &__preview {
+    min-width: 0;
+    width: 100%;
+  }
+
   &__field-label {
     color: var(--text-secondary);
   }
@@ -96,5 +112,11 @@
 
   &__submit {
     width: 100%;
+  }
+
+  @media (max-width: 1024px) {
+    &__layout {
+      grid-template-columns: 1fr;
+    }
   }
 }

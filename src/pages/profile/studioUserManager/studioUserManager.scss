@@ -1,0 +1,48 @@
+@use "../../../global/animations.scss" as animations;
+
+.studio-user-manager {
+  &__note {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  &__actions {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+  }
+
+  &__button {
+    @include animations.interactive-hover-transition();
+
+    &--secondary {
+      border: 1px solid var(--border-default);
+      background: color-mix(in srgb, var(--bg-elevated) 58%, transparent);
+      color: var(--text-primary);
+
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled),
+      &:active:not(:disabled) {
+        background: color-mix(in srgb, var(--bg-elevated) 72%, transparent);
+        color: var(--text-primary);
+      }
+    }
+
+    &--primary {
+      border: 1px solid var(--border-accent);
+      background: color-mix(in srgb, var(--accent-primary) 68%, transparent);
+      color: var(--accent-primary-contrast);
+
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled),
+      &:active:not(:disabled) {
+        background: color-mix(
+          in srgb,
+          var(--accent-primary-hover) 72%,
+          transparent
+        );
+        color: var(--accent-primary-contrast);
+      }
+    }
+  }
+}

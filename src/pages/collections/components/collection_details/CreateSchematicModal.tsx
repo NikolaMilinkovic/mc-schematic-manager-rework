@@ -4,6 +4,7 @@ import customFetch from "../../../../lib/custom_fetch";
 import { compressImage, encodeToBlurHash } from "../../../../lib/imageUtils";
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
+import SchematicPreview from "../../../../components/schematicPreview/SchematicPreview";
 import CollectionsPicker, {
   type Collection as PickerCollection,
 } from "../../../upload_schematics/components/collectionsPicker/CollectionsPicker";
@@ -189,12 +190,15 @@ function CreateSchematicModal({
     }
   }
 
+  const displaySchematicName =
+    schematicName.trim() || schematicFile?.name || "No schematic selected";
+
   return (
     <Modal
       opened={opened}
       onClose={handleClose}
       centered
-      size="lg"
+      size="xl"
       radius="sm"
       title={
         <div className="create-schematic-modal__title-wrap">
@@ -229,52 +233,60 @@ function CreateSchematicModal({
           }
         }}
       >
-        <Stack gap="md">
-          <Text className="create-schematic-modal__hint" size="sm">
-            Drag and drop files into the modal, or paste from clipboard.
-          </Text>
+        <div className="create-schematic-modal__layout">
+          <Stack gap="md" className="create-schematic-modal__fields">
+            <Text className="create-schematic-modal__hint" size="sm">
+              Drag and drop files into the modal, or paste from clipboard.
+            </Text>
 
-          <TextInput
-            label="Name"
-            placeholder="Enter a name..."
-            value={schematicName}
-            onChange={(event) => setSchematicName(event.currentTarget.value)}
-            required
-            withAsterisk={false}
-            radius="sm"
-            classNames={{
-              label: "create-schematic-modal__field-label",
-              input: "create-schematic-modal__field-input",
-            }}
+            <TextInput
+              label="Name"
+              placeholder="Enter a name..."
+              value={schematicName}
+              onChange={(event) => setSchematicName(event.currentTarget.value)}
+              required
+              withAsterisk={false}
+              radius="sm"
+              classNames={{
+                label: "create-schematic-modal__field-label",
+                input: "create-schematic-modal__field-input",
+              }}
+            />
+
+            <FileInput file={schematicFile} onChange={setSchematicFile} />
+
+            <ImgInput file={imageFile} onChange={setImageFile} />
+
+            <TagsInput
+              tags={tags}
+              setTags={setTags}
+              autocomplete={tagAutocomplete}
+            />
+
+            <CollectionsPicker
+              collectionsData={collectionsList}
+              currentCollectionsData={
+                preselectedCollection ? [preselectedCollection] : undefined
+              }
+              updateSchematicCollections={setSelectedCollections}
+            />
+
+            <Button
+              type="submit"
+              radius="sm"
+              loading={isSubmitting}
+              className="create-schematic-modal__submit"
+            >
+              Upload
+            </Button>
+          </Stack>
+
+          <SchematicPreview
+            className="create-schematic-modal__preview"
+            schematicFile={schematicFile}
+            schematicName={displaySchematicName}
           />
-
-          <FileInput file={schematicFile} onChange={setSchematicFile} />
-
-          <ImgInput file={imageFile} onChange={setImageFile} />
-
-          <TagsInput
-            tags={tags}
-            setTags={setTags}
-            autocomplete={tagAutocomplete}
-          />
-
-          <CollectionsPicker
-            collectionsData={collectionsList}
-            currentCollectionsData={
-              preselectedCollection ? [preselectedCollection] : undefined
-            }
-            updateSchematicCollections={setSelectedCollections}
-          />
-
-          <Button
-            type="submit"
-            radius="sm"
-            loading={isSubmitting}
-            className="create-schematic-modal__submit"
-          >
-            Upload
-          </Button>
-        </Stack>
+        </div>
       </form>
     </Modal>
   );

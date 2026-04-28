@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -29,6 +29,8 @@ import {
 } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
 import ActionConfirmModal from "../../../../components/actionConfirmModal/ActionConfirmModal";
+import SchematicRendererModal from "../../../../components/schematicRendererModal/SchematicRendererModal";
+import customFetch from "../../../../lib/custom_fetch";
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
 import SchematicCard from "../../../browse_schematics/components/SchematicCard";
@@ -82,6 +84,11 @@ function CollectionDetails() {
   const [draftSearchValue, setDraftSearchValue] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [demoSchematicId, setDemoSchematicId] = useState<string | null>(null);
+  const [demoSchematicName, setDemoSchematicName] = useState<string | null>(
+    null,
+  );
   const [createSchematicOpen, setCreateSchematicOpen] = useState(false);
   const [addSchematicsOpen, setAddSchematicsOpen] = useState(false);
   const [sidebarOpened, { open: openSidebar, close: closeSidebar }] =
@@ -318,6 +325,32 @@ function CollectionDetails() {
     );
   }
 
+  const handleOpenDemo = useCallback(
+    (schematicId: string, schematicName: string) => {
+      setDemoSchematicId(schematicId);
+      setDemoSchematicName(schematicName);
+      setDemoModalOpen(true);
+    },
+    [],
+  );
+
+  const loadSchematicArrayBuffer = useCallback(async () => {
+    if (!demoSchematicId) {
+      throw new Error("No schematic ID provided");
+    }
+
+    const response = await customFetch<Response>(
+      `/get-schematic-file/${demoSchematicId}`,
+      "GET",
+    );
+
+    if (!(response.data instanceof Response) || !response.data.ok) {
+      throw new Error("Could not fetch schematic binary.");
+    }
+
+    return response.data.arrayBuffer();
+  }, [demoSchematicId]);
+
   async function handleSaveChanges(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -435,6 +468,12 @@ function CollectionDetails() {
         <div className="collection-details__glow collection-details__glow--left" />
       </div>
       <div className="collection-details__frame">
+        <SchematicRendererModal
+          opened={demoModalOpen}
+          onClose={() => setDemoModalOpen(false)}
+          schematicName={demoSchematicName ?? "Schematic"}
+          loadSchematicArrayBuffer={loadSchematicArrayBuffer}
+        />
         <ActionConfirmModal
           opened={removeConfirmOpen}
           onClose={() => setRemoveConfirmOpen(false)}
@@ -640,6 +679,7 @@ function CollectionDetails() {
                         schematic={schematic}
                         collectionId={collection._id}
                         onRemoved={removeSchematicFromActiveCollection}
+                        onOpenDemo={handleOpenDemo}
                       />
                     ))}
                   </div>

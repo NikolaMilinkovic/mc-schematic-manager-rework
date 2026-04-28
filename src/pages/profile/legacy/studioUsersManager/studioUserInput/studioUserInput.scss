@@ -1,0 +1,109 @@
+@import url('../../../global/colors.scss');
+@import url('../../../global/global.scss');
+
+.user-container{
+  margin-bottom: 2rem;
+  padding: 0.5rem 0.5rem;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 8px;
+
+  .password-username-inputs-container{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0rem 1rem;
+  }
+
+  .buttons-container{
+    display: grid;
+    grid-template-columns: 1fr 0.2fr;
+    gap: 1rem;
+    
+
+    .toggle-preview-btn{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      top: 25px;
+      left: 0px;
+      font-size: 20px;
+      padding: 4px;
+      background-color: transparent;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      width: 100%;
+      min-height: 40px;
+  
+      &:focus{
+        outline: none;
+      }
+      &:hover{
+        background-color: var(--highlight-hover);
+      }
+  
+      .toggle-preview-icon{
+        transition: 0.3s ease;
+        width: 20px;
+        height: 20px;
+      }
+    }
+    .remove-user-button{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      top: 25px;
+      left: 0px;
+      font-size: 20px;
+      padding: 4px;
+      background-color: transparent;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      user-select: none;
+      width: 100%;
+      min-height: 40px;
+  
+      &:focus{
+        outline: none;
+      }
+      &:hover{
+        background-color: var(--danger);
+      }
+      &:active{
+        transform: scale(0.95);
+      }
+    }
+  }
+  
+  .permissions-section{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+
+    .permissions-schematics-container{
+
+    }
+    .permissions-collections-container{
+    }
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .user-container{    
+    .permissions-section{
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+}
+@media only screen and (max-width: 550px) {
+  .user-container{    
+    .permissions-section{
+      grid-template-columns: 1fr !important;
+    }
+  }
+}

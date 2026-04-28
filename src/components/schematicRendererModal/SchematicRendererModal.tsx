@@ -28,7 +28,34 @@ function SchematicRendererModal({
   const [stage, setStage] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const titleId = useId();
+
+  useEffect(() => {
+    if (opened) {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      setIsClosing(false);
+      setIsVisible(true);
+    } else if (isVisible) {
+      setIsClosing(true);
+      closeTimerRef.current = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, 300);
+    }
+
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, [opened]);
 
   useEffect(() => {
     if (!opened) {
@@ -174,18 +201,18 @@ function SchematicRendererModal({
     };
   }, [opened]);
 
-  if (!opened) {
+  if (!isVisible) {
     return null;
   }
 
   return createPortal(
     <div
-      className="schematic-renderer-modal"
+      className={`schematic-renderer-modal${isClosing ? " schematic-renderer-modal--closing" : ""}`}
       role="presentation"
       onClick={onClose}
     >
       <div
-        className="schematic-renderer-modal__dialog"
+        className={`schematic-renderer-modal__dialog${isClosing ? " schematic-renderer-modal__dialog--closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

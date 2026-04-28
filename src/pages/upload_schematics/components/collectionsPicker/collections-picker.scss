@@ -1,3 +1,5 @@
+@use "../../../../global/side-panel.scss" as side-panel;
+
 .collections-picker {
   width: 100%;
 
@@ -11,16 +13,9 @@
   }
 
   .collections-picker__input {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-    color: var(--text-primary);
+    @include side-panel.side-panel-input();
     border-radius: 4px;
     min-height: 36px;
-
-    &:focus,
-    &:focus-within {
-      border-color: var(--border-focus);
-    }
   }
 
   .collections-picker__pills-list {
@@ -36,10 +31,14 @@
 }
 
 .collections-picker__dropdown {
-  background: var(--bg-surface);
+  @include side-panel.side-panel-shell(
+    $surface-opacity: 92%,
+    $border-color: var(--border-default),
+    $with-shadow: true,
+    $shadow-opacity: 28%
+  );
   border: 1px solid var(--border-default);
   border-radius: 4px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
 }
 
 .collections-picker__option {

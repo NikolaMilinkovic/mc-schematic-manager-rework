@@ -16,6 +16,7 @@ import { Bounce, ToastContainer } from "react-toastify";
 import { useThemeContext } from "./store/theme_context";
 import Collections from "./pages/collections/Collections";
 import CollectionDetails from "./pages/collections/components/collection_details/CollectionDetails";
+import Profile from "./pages/profile/Profile";
 
 type StackGuardProps = {
   redirectTo: string;
@@ -134,10 +135,7 @@ function App() {
               path="/edit-schematic/:id"
               element={<PlaceholderPage title="Edit Schematic" />}
             />
-            <Route
-              path="/profile/:id"
-              element={<PlaceholderPage title="Profile" />}
-            />
+            <Route path="/profile/:id" element={<Profile />} />
           </Route>
         </Route>
 

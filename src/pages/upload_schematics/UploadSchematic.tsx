@@ -7,6 +7,7 @@ import FileInput from "./components/fileInput/FileInput";
 import ImgInput from "./components/imgInput/ImgInput";
 import TagsInput from "./components/tagsInput/TagsInput";
 import AuthenticatedPageBackground from "../../components/authenticatedPageBackground/AuthenticatedPageBackground";
+import SchematicPreview from "../../components/schematicPreview/SchematicPreview";
 import CollectionsPicker, {
   type Collection,
 } from "./components/collectionsPicker/CollectionsPicker";
@@ -178,6 +179,9 @@ function UploadSchematic() {
     routeDroppedFile(event.clipboardData.files);
   }
 
+  const displaySchematicName =
+    schematicName.trim() || schematicFile?.name || "No schematic selected";
+
   return (
     <AuthenticatedPageBackground
       className={`upload-schematic${isPageEntering ? " page-fade-in" : ""}`}
@@ -198,52 +202,62 @@ function UploadSchematic() {
             if (e.key === "Enter") e.preventDefault();
           }}
         >
-          <Title order={2} className="upload-schematic__title">
-            Upload Schematic
-          </Title>
-
-          <Text className="upload-schematic__hint" size="sm">
-            Drag and drop files anywhere on the page, or paste from clipboard.
-          </Text>
-
-          <Stack gap="md">
-            <TextInput
-              label="Name"
-              placeholder="Enter a name..."
-              value={schematicName}
-              onChange={(e) => setSchematicName(e.target.value)}
-              required
-              withAsterisk={false}
-              classNames={{
-                label: "upload-schematic__field-label",
-                input: "upload-schematic__field-input",
-              }}
-            />
-
-            <FileInput file={schematicFile} onChange={setSchematicFile} />
-
-            <ImgInput file={imageFile} onChange={setImageFile} />
-
-            <TagsInput
-              tags={tags}
-              setTags={setTags}
-              autocomplete={tagAutocomplete}
-            />
-
-            <CollectionsPicker
-              collectionsData={collectionsList}
-              updateSchematicCollections={setSelectedCollections}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              loading={isSubmitting}
-              className="upload-schematic__submit"
-            >
+          <div className="upload-schematic__form-header">
+            <Title order={2} className="upload-schematic__title">
               Upload Schematic
-            </Button>
-          </Stack>
+            </Title>
+
+            <Text className="upload-schematic__hint" size="sm">
+              Drag and drop files anywhere on the page, or paste from clipboard.
+            </Text>
+          </div>
+
+          <div className="upload-schematic__card-content">
+            <Stack gap="md" className="upload-schematic__fields">
+              <TextInput
+                label="Name"
+                placeholder="Enter a name..."
+                value={schematicName}
+                onChange={(e) => setSchematicName(e.target.value)}
+                required
+                withAsterisk={false}
+                classNames={{
+                  label: "upload-schematic__field-label",
+                  input: "upload-schematic__field-input",
+                }}
+              />
+
+              <FileInput file={schematicFile} onChange={setSchematicFile} />
+
+              <ImgInput file={imageFile} onChange={setImageFile} />
+
+              <TagsInput
+                tags={tags}
+                setTags={setTags}
+                autocomplete={tagAutocomplete}
+              />
+
+              <CollectionsPicker
+                collectionsData={collectionsList}
+                updateSchematicCollections={setSelectedCollections}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                loading={isSubmitting}
+                className="upload-schematic__submit"
+              >
+                Upload Schematic
+              </Button>
+            </Stack>
+
+            <SchematicPreview
+              className="upload-schematic__preview"
+              schematicFile={schematicFile}
+              schematicName={displaySchematicName}
+            />
+          </div>
         </form>
       </div>
     </AuthenticatedPageBackground>
