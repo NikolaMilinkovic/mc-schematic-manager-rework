@@ -36,9 +36,9 @@
 
   &__image {
     @include card.card-image();
-
-    // TOGGLE IMAGE KEEP THIS
-    opacity: 0;
+    width: 100%;
+    display: block;
+    opacity: 1;
   }
 
   &__image-placeholder {

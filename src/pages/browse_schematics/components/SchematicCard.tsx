@@ -3,10 +3,9 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { Button, Card, Group, Skeleton, Stack, Text } from "@mantine/core";
+import { Button, Card, Group, Stack, Text } from "@mantine/core";
 import {
   IconDownload,
   IconEdit,
@@ -46,8 +45,6 @@ type SchematicCardProps = {
   onOpenDemo?: (schematicId: string, schematicName: string) => void;
 };
 
-const IMAGE_REVEAL_DELAY_MS = 320;
-
 function hasSchematicPermission(
   activeUser: unknown,
   permission: SchematicPermissionKey,
@@ -68,11 +65,10 @@ function SchematicCard({
 }: SchematicCardProps) {
   const activeUser = useUserStore(selectActiveUser);
   const [copied, setCopied] = useState(false);
-  const [imageVisible, setImageVisible] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMode, setConfirmMode] = useState<"delete" | "remove">("delete");
   const [isBusy, setIsBusy] = useState(false);
-  const revealTimeoutRef = useRef<number | null>(null);
 
   const blurHash = schematic.blur_hash?.hash?.trim() ?? "";
   const hasBlurHash = blurHash.length > 0;
@@ -92,12 +88,8 @@ function SchematicCard({
   const isDeleteMode = confirmMode === "delete";
 
   useEffect(() => {
-    return () => {
-      if (revealTimeoutRef.current !== null) {
-        window.clearTimeout(revealTimeoutRef.current);
-      }
-    };
-  }, []);
+    setIsImageLoaded(false);
+  }, [schematic.image?.url]);
 
   function openConfirm(mode: "delete" | "remove") {
     setConfirmMode(mode);
@@ -200,17 +192,6 @@ function SchematicCard({
     void handleRemoveFromCollection();
   }
 
-  function handleImageLoad() {
-    if (revealTimeoutRef.current !== null) {
-      window.clearTimeout(revealTimeoutRef.current);
-    }
-
-    revealTimeoutRef.current = window.setTimeout(() => {
-      setImageVisible(true);
-      revealTimeoutRef.current = null;
-    }, IMAGE_REVEAL_DELAY_MS);
-  }
-
   return (
     <>
       <ActionConfirmModal
@@ -238,7 +219,7 @@ function SchematicCard({
         <Text className="schematic-card__title">{schematic.name}</Text>
 
         <div className="schematic-card__image-wrap">
-          {!imageVisible && hasBlurHash && (
+          {!isImageLoaded && hasBlurHash && (
             <div className="schematic-card__blurhash" aria-hidden="true">
               <Blurhash
                 hash={blurHash}
@@ -250,16 +231,14 @@ function SchematicCard({
               />
             </div>
           )}
-          {!imageVisible && !hasBlurHash && (
-            <Skeleton className="schematic-card__image-skeleton" />
-          )}
           {schematic.image?.url ? (
             <SchematicImage
               schematicId={schematic._id}
               imageUrl={schematic.image.url}
               alt={`${schematic.name} preview`}
-              className={`schematic-card__image${imageVisible ? " schematic-card__image--loaded" : ""}`}
-              onLoad={handleImageLoad}
+              className="schematic-card__image"
+              onLoad={() => setIsImageLoaded(true)}
+              onError={() => setIsImageLoaded(false)}
               loading="lazy"
             />
           ) : (
