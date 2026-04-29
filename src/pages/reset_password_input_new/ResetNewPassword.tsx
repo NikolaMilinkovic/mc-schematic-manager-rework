@@ -9,9 +9,8 @@ import {
   Title,
 } from "@mantine/core";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { getAuthUrl } from "../../lib/auth.ts";
 import "./reset-new-password.scss";
-
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 type ResetNewPasswordResponse = {
   message?: string;
@@ -80,7 +79,7 @@ function ResetNewPassword() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${apiUrl}/new-password/${token}`, {
+      const response = await fetch(getAuthUrl(`/new-password/${token}`), {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

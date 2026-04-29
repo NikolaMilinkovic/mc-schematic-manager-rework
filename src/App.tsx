@@ -4,6 +4,7 @@ import { useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
 import { Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
+import { requestLogout } from "./lib/auth.ts";
 import { selectIsAuthenticated, useUserStore } from "./store/user_store";
 import Login from "./pages/login/Login";
 import Register from "./pages/register/Register";
@@ -74,7 +75,8 @@ function PlaceholderPage({ title }: PlaceholderPageProps) {
   const isAuthenticated = useUserStore(selectIsAuthenticated);
   const clearActiveUser = useUserStore((state) => state.clearActiveUser);
 
-  function handleLogout() {
+  async function handleLogout() {
+    await requestLogout();
     clearActiveUser();
     navigate("/login", { replace: true });
   }

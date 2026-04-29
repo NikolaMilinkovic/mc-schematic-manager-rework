@@ -14,7 +14,7 @@ export async function downloadSchematicAction({
 }: DownloadSchematicParams): Promise<boolean> {
   try {
     const response = await customFetch<Response>(
-      `/get-schematic-file/${schematicId}`,
+      `/schematics/${schematicId}/file`,
       "GET",
     );
 
@@ -47,7 +47,7 @@ export async function copySchematicStringAction(
 ): Promise<boolean> {
   try {
     const response = await customFetch<Response>(
-      `/get-schematic-fawe-string/${schematicId}`,
+      `/schematics/${schematicId}/fawe-string`,
       "GET",
     );
 
@@ -77,8 +77,8 @@ export async function deleteSchematicAction(
 ): Promise<boolean> {
   try {
     const response = await customFetch<unknown>(
-      `/remove-schematic/${schematicId}`,
-      "GET",
+      `/schematics/${schematicId}`,
+      "DELETE",
     );
 
     if (response.status === 200 || response.status === 201) {

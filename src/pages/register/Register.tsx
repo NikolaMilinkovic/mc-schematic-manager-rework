@@ -10,12 +10,13 @@ import {
   Title,
 } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
+import InputInfoIcon from "../../components/input_info_icon/InputInfoIcon";
+import { getAuthUrl } from "../../lib/auth.ts";
 import "./register.scss";
-
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 type RegisterForm = {
   username: string;
+  studioName: string;
   email: string;
   password: string;
   passwordRepeat: string;
@@ -39,6 +40,7 @@ function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<RegisterForm>({
     username: "",
+    studioName: "",
     email: "",
     password: "",
     passwordRepeat: "",
@@ -84,6 +86,10 @@ function Register() {
       setError("Please enter your username.");
       return;
     }
+    if (!formData.studioName.trim()) {
+      setError("Please enter your studio name.");
+      return;
+    }
     if (!formData.email.trim()) {
       setError("Please enter your email.");
       return;
@@ -104,12 +110,17 @@ function Register() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${apiUrl}/register`, {
+      const response = await fetch(getAuthUrl("/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: formData.username.trim(),
+          studio_name: formData.studioName.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        }),
       });
 
       if (!response.ok) {
@@ -152,18 +163,53 @@ function Register() {
               Create Account
             </Title>
             <Text className="register-page__subtitle">
-              Register to manage collections, schematics, and uploads.
+              Create an owner account with studio name, username, email, and
+              password.
             </Text>
           </div>
 
           <form className="register-page__form" onSubmit={registerUser}>
             <Stack gap="md">
               <TextInput
+                label="Studio Name"
+                name="studioName"
+                value={formData.studioName}
+                onChange={onChange}
+                autoComplete="organization"
+                rightSection={
+                  <InputInfoIcon
+                    ariaLabel="Studio name information"
+                    content={
+                      <Text size="sm">
+                        Your public studio name. This will be visible to other
+                        users. If you want to learn more about studios{" "}
+                        <Anchor component={Link} to="/your-route-here">
+                          click here
+                        </Anchor>
+                        .
+                      </Text>
+                    }
+                  />
+                }
+                rightSectionPointerEvents="all"
+                rightSectionWidth={36}
+                classNames={{
+                  input: "register-page__input",
+                  label: "register-page__label",
+                }}
+              />
+
+              <TextInput
                 label="Username"
                 name="username"
                 value={formData.username}
                 onChange={onChange}
                 autoComplete="username"
+                rightSection={
+                  <InputInfoIcon label="Username visible to others." />
+                }
+                rightSectionPointerEvents="all"
+                rightSectionWidth={36}
                 classNames={{
                   input: "register-page__input",
                   label: "register-page__label",
@@ -177,6 +223,11 @@ function Register() {
                 value={formData.email}
                 onChange={onChange}
                 autoComplete="email"
+                rightSection={
+                  <InputInfoIcon label="Your email address. You will use this for login and password recovery." />
+                }
+                rightSectionPointerEvents="all"
+                rightSectionWidth={36}
                 classNames={{
                   input: "register-page__input",
                   label: "register-page__label",

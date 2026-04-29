@@ -6,15 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Button,
-  Card,
-  Group,
-  Image,
-  Skeleton,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Button, Card, Group, Skeleton, Stack, Text } from "@mantine/core";
 import {
   IconDownload,
   IconEdit,
@@ -24,6 +16,7 @@ import {
 import { Blurhash } from "react-blurhash";
 import { Link } from "react-router-dom";
 import ActionConfirmModal from "../../../components/actionConfirmModal/ActionConfirmModal";
+import SchematicImage from "../../../components/schematicImage/SchematicImage";
 import type { Schematic } from "../../../store/schematic_store";
 import { selectActiveUser, useUserStore } from "../../../store/user_store";
 import {
@@ -261,12 +254,12 @@ function SchematicCard({
             <Skeleton className="schematic-card__image-skeleton" />
           )}
           {schematic.image?.url ? (
-            <Image
-              src={schematic.image.url}
+            <SchematicImage
+              schematicId={schematic._id}
+              imageUrl={schematic.image.url}
               alt={`${schematic.name} preview`}
               className={`schematic-card__image${imageVisible ? " schematic-card__image--loaded" : ""}`}
               onLoad={handleImageLoad}
-              radius="xs"
               loading="lazy"
             />
           ) : (

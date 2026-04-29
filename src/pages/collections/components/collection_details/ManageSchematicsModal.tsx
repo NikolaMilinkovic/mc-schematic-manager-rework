@@ -6,7 +6,6 @@ import {
   Checkbox,
   Group,
   HoverCard,
-  Image,
   Loader,
   Modal,
   Pagination,
@@ -16,6 +15,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
+import SchematicImage from "../../../../components/schematicImage/SchematicImage";
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
 import type { Schematic } from "../../../../store/schematic_store";
@@ -258,8 +258,9 @@ function ManageSchematicsModal({
                     <HoverCard.Target>
                       <div className="manage-schematics-modal__thumb-wrap">
                         {schematic.image?.url ? (
-                          <img
-                            src={schematic.image.url}
+                          <SchematicImage
+                            schematicId={schematic._id}
+                            imageUrl={schematic.image.url}
                             alt={`${schematic.name} preview`}
                             className="manage-schematics-modal__thumb"
                             loading="lazy"
@@ -274,11 +275,12 @@ function ManageSchematicsModal({
 
                     <HoverCard.Dropdown className="manage-schematics-modal__hover-preview">
                       {schematic.image?.url ? (
-                        <Image
-                          src={schematic.image.url}
+                        <SchematicImage
+                          schematicId={schematic._id}
+                          imageUrl={schematic.image.url}
                           alt={`${schematic.name} enlarged preview`}
                           className="manage-schematics-modal__hover-image"
-                          radius="sm"
+                          loading="lazy"
                         />
                       ) : (
                         <Text className="manage-schematics-modal__hover-empty">

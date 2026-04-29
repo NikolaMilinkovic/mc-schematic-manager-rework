@@ -340,7 +340,7 @@ function CollectionDetails() {
     }
 
     const response = await customFetch<Response>(
-      `/get-schematic-file/${demoSchematicId}`,
+      `/schematics/${demoSchematicId}/file`,
       "GET",
     );
 

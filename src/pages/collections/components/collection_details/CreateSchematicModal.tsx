@@ -75,7 +75,7 @@ function CreateSchematicModal({
 
   useEffect(() => {
     async function fetchTags() {
-      const res = await customFetch<TagsResponse>("/get-tags", "GET");
+      const res = await customFetch<TagsResponse>("/schematics/tags", "GET");
       const firstEntry = res.data[0];
       if (firstEntry?.tags) {
         setTagAutocomplete(uniqueTags(firstEntry.tags));
@@ -160,7 +160,7 @@ function CreateSchematicModal({
       formData.append("collectionsList", JSON.stringify(selectedCollections));
 
       const response = await customFetch<unknown>(
-        "/upload-schematic",
+        "/schematics/upload",
         "POST",
         formData,
       );

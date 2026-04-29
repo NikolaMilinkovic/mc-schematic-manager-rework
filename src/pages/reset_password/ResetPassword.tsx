@@ -9,9 +9,8 @@ import {
   Title,
 } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
+import { getAuthUrl } from "../../lib/auth.ts";
 import "./reset-password.scss";
-
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
 
 type ResetPasswordResponse = {
   message?: string;
@@ -59,7 +58,7 @@ function ResetPassword() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${apiUrl}/password-reset`, {
+      const response = await fetch(getAuthUrl("/password-reset"), {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +99,8 @@ function ResetPassword() {
               Reset Password
             </Title>
             <Text className="reset-password-page__subtitle">
-              Enter your recovery email and we&apos;ll send reset instructions.
+              Enter your owner account email and we&apos;ll send reset
+              instructions.
             </Text>
           </div>
 

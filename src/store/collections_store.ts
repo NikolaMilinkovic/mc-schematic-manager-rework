@@ -309,7 +309,7 @@ export const useCollectionsStore = create<CollectionsState>((set, get) => ({
       }
 
       const response = await customFetch<AvailableSchematicsResponse>(
-        `/get-schematics?${params.toString()}`,
+        `/schematics?${params.toString()}`,
         "GET",
       );
 

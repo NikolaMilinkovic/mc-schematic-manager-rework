@@ -3,6 +3,7 @@ import { ActionIcon, Burger, Button, Drawer, Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconUser } from "@tabler/icons-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { requestLogout } from "../../lib/auth.ts";
 import { useUserStore } from "../../store/user_store";
 import NotificationsBell from "../notifications/NotificationsBell";
 import {
@@ -86,7 +87,7 @@ function Navbar({ items = defaultItems, onLogout }: NavbarProps) {
     );
   }
 
-  function handleLogout() {
+  async function handleLogout() {
     if (onLogout) {
       close();
       onLogout();
@@ -94,6 +95,7 @@ function Navbar({ items = defaultItems, onLogout }: NavbarProps) {
     }
 
     close();
+    await requestLogout();
     startTransition(() => {
       clearActiveUser();
       navigate("/login", { replace: true });

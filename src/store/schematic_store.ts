@@ -2,7 +2,7 @@ import { create } from "zustand";
 import customFetch from "../lib/custom_fetch";
 
 export type SchematicImage = {
-  publicId: string;
+  key: string;
   url: string;
 };
 
@@ -90,7 +90,7 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
       }
 
       const response = await customFetch<SchematicsPageResponse>(
-        `/get-schematics?${params.toString()}`,
+        `/schematics?${params.toString()}`,
         "GET",
       );
 

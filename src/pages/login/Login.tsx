@@ -10,13 +10,12 @@ import {
   Title,
 } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
+import { getAuthUrl } from "../../lib/auth.ts";
 import { selectIsAuthenticated, useUserStore } from "../../store/user_store";
 import "./login.scss";
 
-const apiUrl = import.meta.env.VITE_BACKEND_URL;
-
 type LoginForm = {
-  username: string;
+  email: string;
   password: string;
 };
 
@@ -25,16 +24,6 @@ type LoginResponse = {
   studioUser?: Record<string, unknown>;
   user?: Record<string, unknown>;
 };
-
-function getCookie(name: string): string | null {
-  const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
-  const target = cookies.find((cookie) => cookie.startsWith(`${name}=`));
-  if (!target) {
-    return null;
-  }
-
-  return decodeURIComponent(target.slice(name.length + 1));
-}
 
 function setTokenCookie(token: string) {
   const maxAge = 365 * 24 * 60 * 60;
@@ -48,7 +37,7 @@ function Login() {
     (state) => state.handleSetActiveUser,
   );
   const [formData, setFormData] = useState<LoginForm>({
-    username: "",
+    email: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -64,7 +53,7 @@ function Login() {
     const { name, value } = event.currentTarget;
     setFormData((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: name === "email" ? value.toLowerCase() : value,
     }));
   }
 
@@ -72,8 +61,8 @@ function Login() {
     event.preventDefault();
     setError("");
 
-    if (!formData.username.trim()) {
-      setError("Please enter your username.");
+    if (!formData.email.trim()) {
+      setError("Please enter your email.");
       return;
     }
 
@@ -84,16 +73,19 @@ function Login() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`${apiUrl}/login`, {
+      const response = await fetch(getAuthUrl("/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: formData.email.trim(),
+          password: formData.password,
+        }),
       });
 
       if (response.status === 401) {
-        setError("Username or password is incorrect.");
+        setError("Email or password is incorrect.");
         return;
       }
 
@@ -155,11 +147,12 @@ function Login() {
           <form className="login-page__form" onSubmit={loginUser}>
             <Stack gap="md">
               <TextInput
-                label="Username"
-                name="username"
-                value={formData.username}
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
                 onChange={onChange}
-                autoComplete="username"
+                autoComplete="email"
                 classNames={{
                   input: "login-page__input",
                   label: "login-page__label",

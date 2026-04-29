@@ -4,7 +4,6 @@ import {
   Affix,
   Button,
   Group,
-  Loader,
   Pagination,
   Text,
   Transition,
@@ -231,7 +230,7 @@ function BrowseSchematics() {
     }
 
     const response = await customFetch<Response>(
-      `/get-schematic-file/${demoSchematicId}`,
+      `/schematics/${demoSchematicId}/file`,
       "GET",
     );
 
