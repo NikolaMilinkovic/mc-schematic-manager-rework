@@ -107,7 +107,6 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
         ? response.data.schematics
         : [];
 
-      console.log(fetchedSchematics[0]);
       set({
         schematics: fetchedSchematics,
         totalCount: response.data?.totalCount ?? 0,
