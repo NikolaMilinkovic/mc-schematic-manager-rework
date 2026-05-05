@@ -145,14 +145,16 @@
 
   &__content-header--compact {
     width: 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     column-gap: 10px;
+    row-gap: 8px;
   }
 
   &__header-left {
     justify-self: start;
+    min-width: 0;
   }
 
   &__header-actions {
@@ -162,7 +164,8 @@
 
   &__header-actions--compact {
     justify-self: end;
-    flex-wrap: nowrap;
+    margin-left: auto;
+    min-width: 0;
   }
 
   &__title {
@@ -172,8 +175,15 @@
   }
 
   &__title--compact {
+    order: 1;
+    flex: 1 1 100%;
     justify-self: center;
     text-align: center;
+  }
+
+  &__layout-toggle {
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 
   &__subtitle {
@@ -303,8 +313,38 @@
       justify-content: flex-end;
     }
 
+    &__header-left {
+      order: 2;
+    }
+
+    &__header-actions--compact {
+      order: 2;
+    }
+
     &__grid {
       padding-right: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 620px) {
+  .browse-schematics {
+    &__content-header--compact {
+      align-items: stretch;
+    }
+
+    &__title--compact {
+      text-align: left;
+    }
+
+    &__header-left,
+    &__header-actions--compact {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    &__header-actions--compact {
+      justify-content: flex-start;
     }
   }
 }

@@ -343,7 +343,11 @@ function BrowseSchematics() {
               Upload Schematic
             </Button>
 
-            <Group gap={4}>
+            <Group
+              gap={4}
+              wrap="nowrap"
+              className="browse-schematics__layout-toggle"
+            >
               <Tooltip label="Show as cards" withArrow position="bottom">
                 <ActionIcon
                   variant="default"

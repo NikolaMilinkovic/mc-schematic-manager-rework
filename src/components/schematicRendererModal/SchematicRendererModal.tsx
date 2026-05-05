@@ -145,6 +145,112 @@ async function waitForEnabledPacks(
   return enabled;
 }
 
+async function waitForAnimationFrames(frameCount = 1): Promise<void> {
+  for (let index = 0; index < frameCount; index += 1) {
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
+  }
+}
+
+async function waitForCanvasReady(
+  canvas: HTMLCanvasElement,
+  timeoutMs = 3000,
+  pollMs = 50,
+): Promise<void> {
+  const startedAt = Date.now();
+
+  while (
+    (canvas.clientWidth <= 0 || canvas.clientHeight <= 0) &&
+    Date.now() - startedAt < timeoutMs
+  ) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, pollMs);
+    });
+  }
+}
+
+async function waitForSchematicMeshesReady(
+  renderer: RendererType,
+  timeoutMs = 20000,
+): Promise<void> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const schematics = renderer.schematicManager?.getAllSchematics?.() ?? [];
+    const firstSchematic = schematics[0] as
+      | {
+          getMeshes?: () => Promise<unknown>;
+          group?: { children?: unknown[] };
+        }
+      | undefined;
+
+    if (firstSchematic) {
+      if (firstSchematic.getMeshes) {
+        const getMeshesPromise = firstSchematic.getMeshes();
+        const getMeshesTimeout = new Promise<void>((resolve) => {
+          setTimeout(resolve, 1200);
+        });
+
+        await Promise.race([getMeshesPromise, getMeshesTimeout]);
+      }
+
+      if ((firstSchematic.group?.children?.length ?? 0) > 0) {
+        return;
+      }
+    }
+
+    await waitForAnimationFrames(1);
+  }
+
+  throw new Error("Timed out waiting for schematic meshes to become ready");
+}
+
+type SchematicManagerForModal = {
+  loadSchematic: (name: string, buffer: ArrayBuffer) => Promise<void>;
+  removeAllSchematics?: () => Promise<void>;
+};
+
+async function waitForSchematicManager(
+  renderer: RendererType,
+  timeoutMs = 8000,
+  pollMs = 80,
+): Promise<SchematicManagerForModal> {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const manager = renderer.schematicManager as
+      | SchematicManagerForModal
+      | undefined;
+
+    if (manager && typeof manager.loadSchematic === "function") {
+      return manager;
+    }
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, pollMs);
+    });
+  }
+
+  throw new Error("Renderer schematic manager is not available.");
+}
+
+async function focusCameraWithRetry(renderer: RendererType): Promise<void> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await Promise.resolve(renderer.cameraManager?.focusOnSchematics?.());
+    await waitForAnimationFrames(2);
+
+    const schematics = renderer.schematicManager?.getAllSchematics?.() ?? [];
+    const firstSchematic = schematics[0] as
+      | { group?: { children?: unknown[] } }
+      | undefined;
+
+    if ((firstSchematic?.group?.children?.length ?? 0) > 0) {
+      return;
+    }
+  }
+}
+
 async function patchMissingBlockEntitiesTag(
   schematicBuffer: ArrayBuffer,
 ): Promise<ArrayBuffer | null> {
@@ -384,6 +490,9 @@ function SchematicRendererModal({
           throw new Error("Canvas ref not available.");
         }
 
+        await waitForCanvasReady(canvas);
+        throwIfCanceled();
+
         updateStage("constructing-renderer");
 
         const renderer = new SchematicRenderer(
@@ -484,70 +593,93 @@ function SchematicRendererModal({
         const schematicBuffer = await loadSchematicArrayBufferRef.current();
         throwIfCanceled();
         log("schematic buffer fetched", { bytes: schematicBuffer.byteLength });
+        let effectiveSchematicBuffer = schematicBuffer;
+        const loadWithTimeout = async (buffer: ArrayBuffer) => {
+          const schematicManager = await waitForSchematicManager(
+            renderer as RendererType,
+          );
+
+          const loadPromise = schematicManager.loadSchematic("demo", buffer);
+
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+              reject(new Error("loadSchematic timed out after 20s"));
+            }, 20000);
+          });
+
+          await Promise.race([loadPromise, timeoutPromise]);
+        };
 
         updateStage("loading-schematic");
-        // Use preload method if available, otherwise just initialize renderer
-        if (
-          renderer.schematicManager &&
-          "loadSchematic" in renderer.schematicManager
-        ) {
-          const loadWithTimeout = async (buffer: ArrayBuffer) => {
-            const loadPromise = (
-              renderer.schematicManager as any
-            ).loadSchematic("demo", buffer);
+        try {
+          await loadWithTimeout(schematicBuffer);
+          throwIfCanceled();
+          log("loadSchematic completed");
+        } catch (schematicError) {
+          if (shouldAttemptBlockEntitiesAutoHeal(schematicError)) {
+            updateStage("repairing-schematic");
+            log("attempting one-time BlockEntities auto-heal");
 
-            const timeoutPromise = new Promise<never>((_, reject) => {
-              setTimeout(() => {
-                reject(new Error("loadSchematic timed out after 20s"));
-              }, 20000);
-            });
-
-            await Promise.race([loadPromise, timeoutPromise]);
-          };
-
-          try {
-            await loadWithTimeout(schematicBuffer);
+            const patchedBuffer =
+              await patchMissingBlockEntitiesTag(schematicBuffer);
             throwIfCanceled();
-            log("loadSchematic completed");
-          } catch (schematicError) {
-            if (shouldAttemptBlockEntitiesAutoHeal(schematicError)) {
-              updateStage("repairing-schematic");
-              log("attempting one-time BlockEntities auto-heal");
 
-              const patchedBuffer =
-                await patchMissingBlockEntitiesTag(schematicBuffer);
+            if (patchedBuffer) {
+              effectiveSchematicBuffer = patchedBuffer;
+              updateStage("loading-schematic-retry");
+              await loadWithTimeout(patchedBuffer);
               throwIfCanceled();
-
-              if (patchedBuffer) {
-                updateStage("loading-schematic-retry");
-                await loadWithTimeout(patchedBuffer);
-                throwIfCanceled();
-                log("loadSchematic completed after BlockEntities auto-heal", {
-                  patchedBufferBytes: patchedBuffer.byteLength,
-                });
-              } else {
-                console.warn(
-                  "[SchematicRendererModal] BlockEntities auto-heal skipped (no patch produced)",
-                );
-                throw schematicError;
-              }
+              log("loadSchematic completed after BlockEntities auto-heal", {
+                patchedBufferBytes: patchedBuffer.byteLength,
+              });
             } else {
+              console.warn(
+                "[SchematicRendererModal] BlockEntities auto-heal skipped (no patch produced)",
+              );
               throw schematicError;
             }
+          } else {
+            throw schematicError;
           }
         }
+
+        updateStage("waiting-mesh-build");
+        try {
+          await waitForSchematicMeshesReady(renderer as RendererType);
+        } catch (meshWaitError) {
+          const meshWaitErrorMessage = formatUnknownError(meshWaitError);
+          if (
+            !meshWaitErrorMessage.includes("Timed out waiting for schematic")
+          ) {
+            throw meshWaitError;
+          }
+
+          updateStage("recovering-mesh-build");
+          log("mesh readiness timed out, attempting one-time recovery");
+
+          await renderer.packs.rebuildPackAtlas?.();
+          throwIfCanceled();
+
+          const schematicManager = await waitForSchematicManager(
+            renderer as RendererType,
+          );
+          await schematicManager.removeAllSchematics?.();
+          throwIfCanceled();
+
+          await loadWithTimeout(effectiveSchematicBuffer);
+          throwIfCanceled();
+
+          await waitForSchematicMeshesReady(renderer as RendererType, 30000);
+        }
+        throwIfCanceled();
+        log("schematic meshes ready");
 
         updateStage("focusing-camera");
         // Re-apply after init path in case library recreated highlight manager.
         disablePreviewHighlights(renderer);
-        if (renderer.cameraManager) {
-          renderer.cameraManager.focusOnSchematics?.();
-        }
-
-        // Give mesh build one frame before focusing.
-        requestAnimationFrame(() => {
-          rendererRef.current?.cameraManager?.focusOnSchematics?.();
-        });
+        await focusCameraWithRetry(renderer as RendererType);
+        throwIfCanceled();
+        log("camera focus settled");
 
         if (!canceled) {
           setStatus("ready");
