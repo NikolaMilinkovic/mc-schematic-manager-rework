@@ -7,6 +7,11 @@
 
   cursor: pointer;
 
+  &:has(.collection-card__button--danger:hover),
+  &:has(.collection-card__button--danger:focus-visible) {
+    border-color: var(--border-danger);
+  }
+
   &__title {
     color: var(--text-primary);
     font-size: 1.05rem;
@@ -33,8 +38,16 @@
 
   &__image {
     @include card.card-image();
-    // TOGGLE IMAGE KEEP THIS
-    // opacity: 0;
+    opacity: 0;
+    transition: opacity 400ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &--loaded {
+      opacity: 1;
+    }
   }
 
   &__image-placeholder {

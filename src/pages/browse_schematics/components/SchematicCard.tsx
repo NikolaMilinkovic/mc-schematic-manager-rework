@@ -1,10 +1,4 @@
-import {
-  memo,
-  type KeyboardEvent,
-  type MouseEvent,
-  useEffect,
-  useState,
-} from "react";
+import { memo, type KeyboardEvent, type MouseEvent, useState } from "react";
 import { Button, Card, Group, Stack, Text } from "@mantine/core";
 import {
   IconDownload,
@@ -18,6 +12,7 @@ import ActionConfirmModal from "../../../components/actionConfirmModal/ActionCon
 import SchematicImage from "../../../components/schematicImage/SchematicImage";
 import type { Schematic } from "../../../store/schematic_store";
 import { selectActiveUser, useUserStore } from "../../../store/user_store";
+import SchematicCopySuccessIndicator from "./SchematicCopySuccessIndicator";
 import {
   copySchematicStringAction,
   deleteSchematicAction,
@@ -67,10 +62,11 @@ function SchematicCard({
 }: SchematicCardProps) {
   const activeUser = useUserStore(selectActiveUser);
   const [copied, setCopied] = useState(false);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmMode, setConfirmMode] = useState<"delete" | "remove">("delete");
   const [isBusy, setIsBusy] = useState(false);
+  const imageUrl = schematic.image?.url ?? null;
 
   const blurHash = schematic.blur_hash?.hash?.trim() ?? "";
   const hasBlurHash = blurHash.length > 0;
@@ -88,10 +84,7 @@ function SchematicCard({
     "remove_schematic",
   );
   const isDeleteMode = confirmMode === "delete";
-
-  useEffect(() => {
-    setIsImageLoaded(false);
-  }, [schematic.image?.url]);
+  const isImageLoaded = Boolean(imageUrl && loadedImageUrl === imageUrl);
 
   function openConfirm(mode: "delete" | "remove") {
     setConfirmMode(mode);
@@ -218,6 +211,8 @@ function SchematicCard({
         role={canGetSchematic ? "button" : undefined}
         tabIndex={canGetSchematic ? 0 : undefined}
       >
+        <SchematicCopySuccessIndicator visible={copied} />
+
         <Text className="schematic-card__title">{schematic.name}</Text>
 
         <div className="schematic-card__image-wrap">
@@ -233,14 +228,14 @@ function SchematicCard({
               />
             </div>
           )}
-          {schematic.image?.url ? (
+          {imageUrl ? (
             <SchematicImage
               schematicId={schematic._id}
-              imageUrl={schematic.image.url}
+              imageUrl={imageUrl}
               alt={`${schematic.name} preview`}
               className="schematic-card__image"
-              onLoad={() => setIsImageLoaded(true)}
-              onError={() => setIsImageLoaded(false)}
+              onLoad={() => setLoadedImageUrl(imageUrl)}
+              onError={() => setLoadedImageUrl(null)}
               loading="lazy"
             />
           ) : (

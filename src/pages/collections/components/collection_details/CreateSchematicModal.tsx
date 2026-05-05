@@ -4,7 +4,7 @@ import customFetch from "../../../../lib/custom_fetch";
 import { compressImage, encodeToBlurHash } from "../../../../lib/imageUtils";
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
-import SchematicPreview from "../../../../components/schematicPreview/SchematicPreview";
+import SchematicRendererInline from "../../../../components/schematicRendererInline/SchematicRendererInline";
 import CollectionsPicker, {
   type Collection as PickerCollection,
 } from "../../../upload_schematics/components/collectionsPicker/CollectionsPicker";
@@ -281,7 +281,7 @@ function CreateSchematicModal({
             </Button>
           </Stack>
 
-          <SchematicPreview
+          <SchematicRendererInline
             className="create-schematic-modal__preview"
             schematicFile={schematicFile}
             schematicName={displaySchematicName}

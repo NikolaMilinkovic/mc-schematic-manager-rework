@@ -160,11 +160,10 @@ function Register() {
         <Stack gap="lg">
           <div className="register-page__hero">
             <Title order={1} className="register-page__title">
-              Create Account
+              Sign Up
             </Title>
             <Text className="register-page__subtitle">
-              Create an owner account with studio name, username, email, and
-              password.
+              Sign up now & start managing your creations!
             </Text>
           </div>
 
@@ -206,7 +205,7 @@ function Register() {
                 onChange={onChange}
                 autoComplete="username"
                 rightSection={
-                  <InputInfoIcon label="Username visible to others." />
+                  <InputInfoIcon label="Username visible to other users." />
                 }
                 rightSectionPointerEvents="all"
                 rightSectionWidth={36}
@@ -224,7 +223,7 @@ function Register() {
                 onChange={onChange}
                 autoComplete="email"
                 rightSection={
-                  <InputInfoIcon label="Your email address. You will use this for login and password recovery." />
+                  <InputInfoIcon label="Your email address. Used for login and password recovery." />
                 }
                 rightSectionPointerEvents="all"
                 rightSectionWidth={36}

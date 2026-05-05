@@ -7,7 +7,7 @@ import FileInput from "./components/fileInput/FileInput";
 import ImgInput from "./components/imgInput/ImgInput";
 import TagsInput from "./components/tagsInput/TagsInput";
 import AuthenticatedPageBackground from "../../components/authenticatedPageBackground/AuthenticatedPageBackground";
-import SchematicPreview from "../../components/schematicPreview/SchematicPreview";
+import SchematicRendererInline from "../../components/schematicRendererInline/SchematicRendererInline";
 import CollectionsPicker, {
   type Collection,
 } from "./components/collectionsPicker/CollectionsPicker";
@@ -252,7 +252,7 @@ function UploadSchematic() {
               </Button>
             </Stack>
 
-            <SchematicPreview
+            <SchematicRendererInline
               className="upload-schematic__preview"
               schematicFile={schematicFile}
               schematicName={displaySchematicName}

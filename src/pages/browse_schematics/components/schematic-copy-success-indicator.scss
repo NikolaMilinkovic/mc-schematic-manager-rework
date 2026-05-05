@@ -1,0 +1,206 @@
+@use "../../../global/animations.scss" as animations;
+
+@keyframes schematic-copy-success-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes schematic-copy-success-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes schematic-copy-success-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes schematic-copy-success-backdrop-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes schematic-copy-success-badge-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.72);
+  }
+
+  62% {
+    transform: translate3d(0, -1px, 0) scale(1.04);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes schematic-copy-success-badge-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0) scale(0.88);
+  }
+}
+
+@keyframes schematic-copy-success-check-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1px, 0) scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes schematic-copy-success-check-draw {
+  from {
+    stroke-dashoffset: 28;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.schematic-copy-success {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: schematic-copy-success-overlay-in 180ms ease-out both;
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, black 70%, transparent);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+    animation: schematic-copy-success-backdrop-in 180ms ease-out both;
+  }
+
+  &__badge {
+    position: relative;
+    z-index: 1;
+    width: 58px;
+    height: 58px;
+    border-radius: 999px;
+    background: radial-gradient(
+      140% 140% at 28% 18%,
+      color-mix(in srgb, var(--accent-primary) 80%, white 20%) 0%,
+      color-mix(in srgb, var(--accent-primary) 92%, black 8%) 54%,
+      color-mix(in srgb, var(--accent-primary) 82%, black 18%) 100%
+    );
+    color: var(--white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 14px 28px color-mix(in srgb, black 45%, transparent),
+      0 6px 16px color-mix(in srgb, var(--accent-primary) 35%, transparent),
+      inset 0 1px 0 color-mix(in srgb, white 55%, transparent),
+      inset 0 -2px 5px color-mix(in srgb, black 24%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--accent-primary) 56%, black 44%);
+    animation: schematic-copy-success-badge-in 260ms
+      animations.$ui-card-hover-transition-easing both;
+    will-change: transform, opacity;
+  }
+
+  &__check {
+    width: 30px;
+    height: 30px;
+    animation: schematic-copy-success-check-in 220ms
+      cubic-bezier(0.22, 1, 0.36, 1) 70ms both;
+    will-change: transform, opacity;
+
+    path {
+      fill: none;
+      stroke: var(--white);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 28;
+      stroke-dashoffset: 28;
+      filter: drop-shadow(0 1px 0 color-mix(in srgb, black 25%, transparent));
+      animation: schematic-copy-success-check-draw 220ms
+        cubic-bezier(0.22, 1, 0.36, 1) 110ms forwards;
+    }
+  }
+
+  &--exit {
+    animation: schematic-copy-success-overlay-out 220ms ease-in both;
+
+    .schematic-copy-success__backdrop {
+      animation: schematic-copy-success-backdrop-out 220ms ease-in both;
+    }
+
+    .schematic-copy-success__badge {
+      animation: schematic-copy-success-badge-out 220ms ease-in both;
+    }
+
+    .schematic-copy-success__check {
+      opacity: 0;
+      transition: opacity 120ms ease-in;
+
+      path {
+        transition: opacity 120ms ease-in;
+        opacity: 0;
+      }
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schematic-copy-success {
+    animation: none;
+
+    &__badge {
+      animation: none;
+      transform: none;
+    }
+
+    &__check {
+      animation: none;
+      transition: none;
+    }
+
+    &--exit {
+      animation: none;
+
+      .schematic-copy-success__backdrop,
+      .schematic-copy-success__badge {
+        animation: none;
+      }
+    }
+  }
+}

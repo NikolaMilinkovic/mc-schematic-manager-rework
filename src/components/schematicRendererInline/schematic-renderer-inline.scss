@@ -1,0 +1,90 @@
+.schematic-renderer-inline {
+  display: flex;
+  flex-direction: column;
+  min-height: fit-content;
+  min-width: 0;
+  width: 100%;
+  overflow: visible;
+
+  &__header {
+    align-items: baseline;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    min-height: 34px;
+    padding: 0 0 0.5rem;
+  }
+
+  &__title {
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  &__name {
+    color: var(--text-muted);
+    font-size: 0.79rem;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__viewport {
+    background: color-mix(in srgb, var(--bg-canvas) 88%, var(--black));
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    aspect-ratio: 1 / 1;
+    max-width: 100%;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  &__canvas {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+
+  &__overlay {
+    align-items: center;
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--bg-subtle) 88%, transparent),
+      color-mix(in srgb, var(--bg-canvas) 86%, transparent)
+    );
+    color: var(--text-primary);
+    display: flex;
+    font-size: 0.88rem;
+    inset: 0;
+    justify-content: center;
+    padding: 1rem;
+    position: absolute;
+    text-align: center;
+    z-index: 10;
+  }
+
+  &__loading {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__spinner {
+    animation: spin 0.8s linear infinite;
+    border: 3px solid color-mix(in srgb, var(--text-primary) 20%, transparent);
+    border-top-color: var(--text-primary);
+    border-radius: 50%;
+    height: 28px;
+    width: 28px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

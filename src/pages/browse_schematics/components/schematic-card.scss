@@ -3,10 +3,19 @@
 
 .schematic-card {
   @include card.card-base();
+  position: relative;
+  --schematic-image-opacity: 0.94;
+  --schematic-image-brightness: 0.86;
+  --schematic-image-saturation: 0.9;
 
   &--clickable {
     cursor: pointer;
     @include animations.interactive-card-hover-transition();
+  }
+
+  &:has(.schematic-card__button--danger:hover),
+  &:has(.schematic-card__button--danger:focus-visible) {
+    border-color: var(--border-danger);
   }
 
   &__title {
@@ -38,7 +47,24 @@
     @include card.card-image();
     width: 100%;
     display: block;
-    // opacity: 0;
+    opacity: var(--schematic-image-opacity);
+    filter: brightness(var(--schematic-image-brightness))
+      saturate(var(--schematic-image-saturation));
+    transition:
+      filter 180ms ease,
+      opacity 180ms ease;
+  }
+
+  &--clickable:hover &__image {
+    opacity: calc(var(--schematic-image-opacity) + 0.04);
+    filter: brightness(calc(var(--schematic-image-brightness) + 0.1))
+      saturate(calc(var(--schematic-image-saturation) + 0.07));
+  }
+
+  &--clickable:active &__image {
+    opacity: calc(var(--schematic-image-opacity) - 0.03);
+    filter: brightness(calc(var(--schematic-image-brightness) - 0.04))
+      saturate(var(--schematic-image-saturation));
   }
 
   &__image-placeholder {

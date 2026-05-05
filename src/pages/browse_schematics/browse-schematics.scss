@@ -262,19 +262,25 @@
   &__view-toggle-btn {
     @include animations.interactive-hover-transition();
     --ai-size: 36px;
-    background: var(--bg-elevated);
+    background: transparent;
     border: 1px solid var(--border-default);
     color: #ffffff;
 
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+    &:hover:not(:disabled),
+    &[data-hovered],
+    &:active {
+      background: transparent;
       border-color: var(--border-strong);
     }
 
     &--active {
+      background: transparent;
       border-color: var(--accent-primary);
 
-      &:hover:not(:disabled) {
+      &:hover:not(:disabled),
+      &[data-hovered],
+      &:active {
+        background: transparent;
         border-color: var(--accent-primary);
       }
     }

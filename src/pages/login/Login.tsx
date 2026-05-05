@@ -25,6 +25,9 @@ type LoginResponse = {
   user?: Record<string, unknown>;
 };
 
+const DEMO_EMAIL = "test_account@gmail.com";
+const DEMO_PASSWORD = "Vsi85JCFmfbSbnt";
+
 function setTokenCookie(token: string) {
   const maxAge = 365 * 24 * 60 * 60;
   document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; SameSite=Lax`;
@@ -55,6 +58,14 @@ function Login() {
       ...prevState,
       [name]: name === "email" ? value.toLowerCase() : value,
     }));
+  }
+
+  function fillDemoCredentials() {
+    setFormData({
+      email: DEMO_EMAIL,
+      password: DEMO_PASSWORD,
+    });
+    setError("");
   }
 
   async function loginUser(event: React.FormEvent<HTMLFormElement>) {
@@ -173,13 +184,24 @@ function Login() {
 
               {error && <Text className="login-page__error">{error}</Text>}
 
-              <Button
-                type="submit"
-                loading={isSubmitting}
-                className="login-page__submit"
-              >
-                Login
-              </Button>
+              <div className="login-page__actions">
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  className="login-page__submit"
+                >
+                  Login
+                </Button>
+                <Button
+                  type="button"
+                  radius="xs"
+                  variant="subtle"
+                  className="login-page__demo-button"
+                  onClick={fillDemoCredentials}
+                >
+                  Try Demo Account
+                </Button>
+              </div>
 
               <div className="login-page__links">
                 <Text className="login-page__links-text">
