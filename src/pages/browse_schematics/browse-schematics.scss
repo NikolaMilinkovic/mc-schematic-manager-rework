@@ -240,6 +240,35 @@
     padding-bottom: 12px;
     padding-right: 2rem;
   }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 12px;
+    padding-right: 2rem;
+  }
+
+  &__view-toggle-btn {
+    @include animations.interactive-hover-transition();
+    --ai-size: 36px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: #ffffff;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+      border-color: var(--border-strong);
+    }
+
+    &--active {
+      border-color: var(--accent-primary);
+
+      &:hover:not(:disabled) {
+        border-color: var(--accent-primary);
+      }
+    }
+  }
 }
 
 @media (max-width: 980px) {

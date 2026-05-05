@@ -6,12 +6,15 @@ import {
   Group,
   Pagination,
   Text,
+  Tooltip,
   Transition,
 } from "@mantine/core";
 import {
   IconArrowUp,
   IconChevronLeft,
   IconChevronRight,
+  IconLayoutGrid,
+  IconLayoutRows,
 } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useSchematicsStore } from "../../store/schematic_store";
@@ -20,9 +23,14 @@ import Loading from "../../components/loading/Loading";
 import SchematicRendererModal from "../../components/schematicRendererModal/SchematicRendererModal";
 import CreateSchematicModal from "../collections/components/collection_details/CreateSchematicModal";
 import BrowseFilters from "./components/BrowseFilters";
+import EditSchematic from "./components/EditSchematic";
 import SchematicCard from "./components/SchematicCard";
+import SchematicRow from "./components/SchematicRow";
 import customFetch from "../../lib/custom_fetch";
+import type { Schematic } from "../../store/schematic_store";
 import "./browse-schematics.scss";
+
+const LAYOUT_MODE_STORAGE_KEY = "schematic-layout-mode";
 
 function BrowseSchematics() {
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -30,12 +38,20 @@ function BrowseSchematics() {
   const [visibleCardsCount, setVisibleCardsCount] = useState(0);
   const [draftSearchTerm, setDraftSearchTerm] = useState("");
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingSchematic, setEditingSchematic] = useState<Schematic | null>(
+    null,
+  );
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoSchematicId, setDemoSchematicId] = useState<string | null>(null);
   const [demoSchematicName, setDemoSchematicName] = useState<string | null>(
     null,
   );
   const [resourcePackBlob, setResourcePackBlob] = useState<Blob | null>(null);
+  const [displayMode, setDisplayMode] = useState<"cards" | "rows">(() => {
+    const saved = localStorage.getItem(LAYOUT_MODE_STORAGE_KEY);
+    return saved === "rows" ? "rows" : "cards";
+  });
 
   const schematics = useSchematicsStore((state) => state.schematics);
   const searchTerm = useSchematicsStore((state) => state.searchTerm);
@@ -59,6 +75,9 @@ function BrowseSchematics() {
   const removeSchematicLocal = useSchematicsStore(
     (state) => state.removeSchematicLocal,
   );
+  const updateSchematicLocal = useSchematicsStore(
+    (state) => state.updateSchematicLocal,
+  );
   const collectionOptions = useCollectionsStore(
     (state) => state.collectionOptions,
   );
@@ -71,6 +90,10 @@ function BrowseSchematics() {
   useEffect(() => {
     setDraftSearchTerm(searchTerm);
   }, [searchTerm]);
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_MODE_STORAGE_KEY, displayMode);
+  }, [displayMode]);
 
   useEffect(() => {
     void fetchSchematics();
@@ -224,6 +247,16 @@ function BrowseSchematics() {
     [],
   );
 
+  const handleOpenEdit = useCallback((schematic: Schematic) => {
+    setEditingSchematic(schematic);
+    setEditDrawerOpen(true);
+  }, []);
+
+  function handleCloseEditDrawer() {
+    setEditDrawerOpen(false);
+    setEditingSchematic(null);
+  }
+
   const loadSchematicArrayBuffer = useCallback(async () => {
     if (!demoSchematicId) {
       throw new Error("No schematic ID provided");
@@ -309,6 +342,42 @@ function BrowseSchematics() {
             >
               Upload Schematic
             </Button>
+
+            <Group gap={4}>
+              <Tooltip label="Show as cards" withArrow position="bottom">
+                <ActionIcon
+                  variant="default"
+                  radius="sm"
+                  aria-label="Show as cards"
+                  aria-pressed={displayMode === "cards"}
+                  className={`browse-schematics__view-toggle-btn${
+                    displayMode === "cards"
+                      ? " browse-schematics__view-toggle-btn--active"
+                      : ""
+                  }`}
+                  onClick={() => setDisplayMode("cards")}
+                >
+                  <IconLayoutGrid size={16} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Show as rows" withArrow position="bottom">
+                <ActionIcon
+                  variant="default"
+                  radius="sm"
+                  aria-label="Show as rows"
+                  aria-pressed={displayMode === "rows"}
+                  className={`browse-schematics__view-toggle-btn${
+                    displayMode === "rows"
+                      ? " browse-schematics__view-toggle-btn--active"
+                      : ""
+                  }`}
+                  onClick={() => setDisplayMode("rows")}
+                >
+                  <IconLayoutRows size={16} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+
             <ActionIcon
               variant="default"
               radius="sm"
@@ -346,16 +415,31 @@ function BrowseSchematics() {
             <Loading />
           ) : hasSchematics ? (
             <>
-              <div className="browse-schematics__grid">
-                {visibleSchematics.map((schematic) => (
-                  <SchematicCard
-                    key={schematic._id}
-                    schematic={schematic}
-                    onRemoved={removeSchematicLocal}
-                    onOpenDemo={handleOpenDemo}
-                  />
-                ))}
-              </div>
+              {displayMode === "cards" ? (
+                <div className="browse-schematics__grid">
+                  {visibleSchematics.map((schematic) => (
+                    <SchematicCard
+                      key={schematic._id}
+                      schematic={schematic}
+                      onRemoved={removeSchematicLocal}
+                      onOpenDemo={handleOpenDemo}
+                      onEdit={handleOpenEdit}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="browse-schematics__list">
+                  {visibleSchematics.map((schematic) => (
+                    <SchematicRow
+                      key={schematic._id}
+                      schematic={schematic}
+                      onRemoved={removeSchematicLocal}
+                      onOpenDemo={handleOpenDemo}
+                      onEdit={handleOpenEdit}
+                    />
+                  ))}
+                </div>
+              )}
 
               {hasMoreCardsToRender && <Loading />}
 
@@ -389,6 +473,31 @@ function BrowseSchematics() {
         onClose={() => setUploadModalOpen(false)}
         onSuccess={() => {
           void fetchSchematics(currentPage);
+        }}
+      />
+
+      <EditSchematic
+        opened={editDrawerOpen}
+        schematic={editingSchematic}
+        onClose={handleCloseEditDrawer}
+        onUpdated={(payload) => {
+          const imageUpdate = payload.imageBase64
+            ? {
+                image: {
+                  key: editingSchematic?.image?.key ?? "",
+                  url: payload.imageBase64,
+                },
+              }
+            : {};
+
+          updateSchematicLocal(payload.schematicId, {
+            name: payload.schematicName,
+            tags: payload.tags,
+            original_file_name: payload.originalFileName,
+            blur_hash: payload.blurHash,
+            ...imageUpdate,
+            last_updated: new Date().toISOString(),
+          });
         }}
       />
 

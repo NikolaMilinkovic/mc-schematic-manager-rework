@@ -172,7 +172,6 @@ function CollectionCard({ collection, onRemove }: CollectionCardProps) {
             <Button
               radius="xs"
               variant="subtle"
-              color="red"
               aria-label="Remove collection"
               onClick={handleRemove}
               className="collection-card__button collection-card__button--danger"

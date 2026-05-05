@@ -41,6 +41,20 @@ type SchematicsState = {
   setSelectedCollectionIds: (collectionIds: string[]) => void;
   clearFilters: () => void;
   removeSchematicLocal: (schematicId: string) => void;
+  updateSchematicLocal: (
+    schematicId: string,
+    updates: Partial<
+      Pick<
+        Schematic,
+        | "name"
+        | "tags"
+        | "image"
+        | "blur_hash"
+        | "original_file_name"
+        | "last_updated"
+      >
+    >,
+  ) => void;
   setPage: (page: number) => void;
 };
 
@@ -144,6 +158,15 @@ export const useSchematicsStore = create<SchematicsState>((set, get) => ({
       schematics: schematics.filter((s) => s._id !== schematicId),
       totalCount: Math.max(0, totalCount - 1),
     });
+  },
+  updateSchematicLocal: (schematicId, updates) => {
+    set((state) => ({
+      schematics: state.schematics.map((schematic) =>
+        schematic._id === schematicId
+          ? { ...schematic, ...updates }
+          : schematic,
+      ),
+    }));
   },
   setPage: (page) => {
     void get().fetchSchematics(page);

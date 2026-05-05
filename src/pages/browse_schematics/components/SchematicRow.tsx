@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Button, Card, Group, Stack, Text } from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import {
   IconDownload,
   IconEdit,
@@ -24,7 +24,7 @@ import {
   downloadSchematicAction,
   removeSchematicFromCollectionAction,
 } from "./methods/schematic-card-methods";
-import "./schematic-card.scss";
+import "./schematic-row.scss";
 
 type SchematicPermissionKey =
   | "get_schematic"
@@ -38,7 +38,7 @@ type PermissionShape = {
   };
 };
 
-type SchematicCardProps = {
+type SchematicRowProps = {
   schematic: Schematic;
   onRemoved?: (schematicId: string) => void;
   collectionId?: string;
@@ -58,13 +58,13 @@ function hasSchematicPermission(
   return Boolean(permissions?.schematic?.[permission]);
 }
 
-function SchematicCard({
+function SchematicRow({
   schematic,
   onRemoved,
   collectionId,
   onOpenDemo,
   onEdit,
-}: SchematicCardProps) {
+}: SchematicRowProps) {
   const activeUser = useUserStore(selectActiveUser);
   const [copied, setCopied] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -126,7 +126,7 @@ function SchematicCard({
     }
   }
 
-  function handleCardClick(event: MouseEvent<HTMLDivElement>) {
+  function handleRowClick(event: MouseEvent<HTMLDivElement>) {
     if (!canGetSchematic || isBusy) {
       return;
     }
@@ -139,7 +139,7 @@ function SchematicCard({
     void handleGetSchematic();
   }
 
-  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function handleRowKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!canGetSchematic || isBusy) {
       return;
     }
@@ -209,26 +209,22 @@ function SchematicCard({
         confirmLabel={isDeleteMode ? "Delete" : "Remove"}
         isLoading={isBusy}
       />
-      <Card
-        className={`schematic-card${canGetSchematic ? " schematic-card--clickable" : ""}`}
-        radius="sm"
-        p="md"
-        onClick={handleCardClick}
-        onKeyDown={handleCardKeyDown}
+      <div
+        className={`schematic-row${canGetSchematic ? " schematic-row--clickable" : ""}`}
+        onClick={handleRowClick}
+        onKeyDown={handleRowKeyDown}
         role={canGetSchematic ? "button" : undefined}
         tabIndex={canGetSchematic ? 0 : undefined}
       >
-        <Text className="schematic-card__title">{schematic.name}</Text>
-
-        <div className="schematic-card__image-wrap">
+        <div className="schematic-row__image-wrap">
           {!isImageLoaded && hasBlurHash && (
-            <div className="schematic-card__blurhash" aria-hidden="true">
+            <div className="schematic-row__blurhash" aria-hidden="true">
               <Blurhash
                 hash={blurHash}
                 width={blurWidth}
                 height={blurHeight}
-                resolutionX={32}
-                resolutionY={32}
+                resolutionX={16}
+                resolutionY={16}
                 punch={1}
               />
             </div>
@@ -238,20 +234,20 @@ function SchematicCard({
               schematicId={schematic._id}
               imageUrl={schematic.image.url}
               alt={`${schematic.name} preview`}
-              className="schematic-card__image"
+              className="schematic-row__image"
               onLoad={() => setIsImageLoaded(true)}
               onError={() => setIsImageLoaded(false)}
               loading="lazy"
             />
           ) : (
-            <div className="schematic-card__image-placeholder">
-              No preview image
+            <div className="schematic-row__image-placeholder">
+              <IconCube size={20} />
             </div>
           )}
           {onOpenDemo && (
             <button
               type="button"
-              className="schematic-card__demo-button"
+              className="schematic-row__demo-button"
               onClick={(event) => {
                 event.stopPropagation();
                 onOpenDemo(schematic._id, schematic.name);
@@ -259,104 +255,112 @@ function SchematicCard({
               aria-label="Open 3D demo"
               title="Open 3D demo"
             >
-              <IconCube size={18} />
+              <IconCube size={14} />
             </button>
           )}
         </div>
 
-        <Stack gap={8} mt="sm" className="schematic-card__actions">
+        <Text className="schematic-row__title">{schematic.name}</Text>
+
+        <Group gap={6} className="schematic-row__actions" wrap="nowrap">
           {canGetSchematic && (
             <Button
               radius="xs"
               variant="subtle"
+              size="xs"
               onClick={(event) => {
                 event.stopPropagation();
                 void handleGetSchematic();
               }}
               loading={isBusy}
-              className="schematic-card__button schematic-card__button--get"
+              className="schematic-row__button schematic-row__button--get"
             >
-              {copied ? "Copied to clipboard" : "Get schematic"}
+              {copied ? "Copied!" : "Get"}
             </Button>
           )}
 
-          <Group grow gap={8}>
-            {canEditSchematic &&
-              (onEdit ? (
-                <Button
-                  radius="xs"
-                  variant="subtle"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onEdit(schematic);
-                  }}
-                  className="schematic-card__button schematic-card__button--muted"
-                >
-                  <IconEdit size={15} />
-                </Button>
-              ) : (
-                <Button
-                  radius="xs"
-                  variant="subtle"
-                  component={Link}
-                  to={`/edit-schematic/${schematic._id}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                  className="schematic-card__button schematic-card__button--muted"
-                >
-                  <IconEdit size={15} />
-                </Button>
-              ))}
-            {canDownloadSchematic && (
+          {canEditSchematic &&
+            (onEdit ? (
               <Button
                 radius="xs"
                 variant="subtle"
+                size="xs"
                 onClick={(event) => {
                   event.stopPropagation();
-                  void handleDownload();
+                  onEdit(schematic);
                 }}
-                loading={isBusy}
-                className="schematic-card__button schematic-card__button--muted"
+                className="schematic-row__button schematic-row__button--muted"
               >
-                <IconDownload size={15} />
+                <IconEdit size={14} />
               </Button>
-            )}
-            {canRemoveSchematic && (
+            ) : (
               <Button
                 radius="xs"
                 variant="subtle"
+                size="xs"
+                component={Link}
+                to={`/edit-schematic/${schematic._id}`}
                 onClick={(event) => {
                   event.stopPropagation();
-                  openConfirm("delete");
                 }}
-                disabled={isBusy}
-                className="schematic-card__button schematic-card__button--danger"
+                className="schematic-row__button schematic-row__button--muted"
               >
-                <IconTrash size={15} />
+                <IconEdit size={14} />
               </Button>
-            )}
-          </Group>
+            ))}
+
+          {canDownloadSchematic && (
+            <Button
+              radius="xs"
+              variant="subtle"
+              size="xs"
+              onClick={(event) => {
+                event.stopPropagation();
+                void handleDownload();
+              }}
+              loading={isBusy}
+              className="schematic-row__button schematic-row__button--muted"
+            >
+              <IconDownload size={14} />
+            </Button>
+          )}
+
+          {canRemoveSchematic && (
+            <Button
+              radius="xs"
+              variant="subtle"
+              size="xs"
+              onClick={(event) => {
+                event.stopPropagation();
+                openConfirm("delete");
+              }}
+              disabled={isBusy}
+              className="schematic-row__button schematic-row__button--danger"
+            >
+              <IconTrash size={14} />
+            </Button>
+          )}
 
           {collectionId && canRemoveSchematic && (
             <Button
               radius="xs"
               variant="subtle"
-              leftSection={<IconTrash size={15} />}
+              size="xs"
+              leftSection={<IconTrash size={14} />}
               onClick={(event) => {
                 event.stopPropagation();
                 openConfirm("remove");
               }}
               disabled={isBusy}
-              className="schematic-card__button schematic-card__button--danger"
+              className="schematic-row__button schematic-row__button--danger"
             >
-              Remove from collection
+              Remove
             </Button>
           )}
-        </Stack>
-      </Card>
+        </Group>
+      </div>
     </>
   );
 }
 
-export default memo(SchematicCard);
+export default memo(SchematicRow);

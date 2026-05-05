@@ -1,0 +1,117 @@
+@use "../../../global/animations.scss" as animations;
+@use "../../../global/card.scss" as card;
+
+.schematic-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg-surface) 65%, transparent);
+  min-height: 68px;
+
+  &--clickable {
+    cursor: pointer;
+    @include animations.interactive-card-hover-transition();
+  }
+
+  &__image-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px;
+    height: 52px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
+  }
+
+  &__blurhash {
+    position: absolute;
+    inset: 0;
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+  }
+
+  &__image {
+    width: 72px;
+    height: 52px;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+  }
+
+  &__demo-button {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.65);
+    border: none;
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+    transform: scale(0.8);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.85);
+    }
+  }
+
+  &__image-wrap:hover &__demo-button {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  &__button {
+    @include card.card-button-base();
+
+    &--get {
+      @include card.card-button-get();
+    }
+
+    &--muted {
+      @include card.card-button-muted();
+    }
+
+    &--danger {
+      @include card.card-button-danger();
+    }
+  }
+}
