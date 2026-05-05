@@ -354,7 +354,7 @@ function SchematicRow({
               disabled={isBusy}
               className="schematic-row__button schematic-row__button--danger"
             >
-              Remove
+              Remove from collection
             </Button>
           )}
         </Group>

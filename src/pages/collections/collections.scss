@@ -131,6 +131,38 @@
     align-self: center;
   }
 
+  &__layout-toggle {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__view-toggle-btn {
+    --ai-size: 36px;
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: #ffffff;
+
+    &:hover:not(:disabled),
+    &[data-hovered],
+    &:active {
+      background: transparent;
+      border-color: var(--border-strong);
+    }
+
+    &--active {
+      background: transparent;
+      border-color: var(--accent-primary);
+
+      &:hover:not(:disabled),
+      &[data-hovered],
+      &:active {
+        background: transparent;
+        border-color: var(--accent-primary);
+      }
+    }
+  }
+
   &__page-control {
     --ai-size: 36px;
   }
@@ -222,6 +254,13 @@
     padding-bottom: 12px;
   }
 
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 12px;
+  }
+
   &__pagination {
     margin-top: auto;
     padding-top: 12px;
@@ -266,6 +305,7 @@
       min-width: 0;
       justify-content: flex-end;
       flex-wrap: nowrap;
+      gap: 6px;
     }
 
     &__search-field {

@@ -89,8 +89,9 @@
     @include card.card-button-base();
 
     cursor: pointer;
-    min-width: 0;
-    padding-inline: 0;
+    min-width: 36px;
+    min-height: 32px;
+    padding-inline: 6px;
 
     .mantine-Button-inner {
       justify-content: center;

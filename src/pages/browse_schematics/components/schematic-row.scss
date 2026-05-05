@@ -13,7 +13,17 @@
 
   &--clickable {
     cursor: pointer;
-    @include animations.interactive-card-hover-transition();
+    @include animations.interactive-card-hover-transition(
+      $hover-y: -1px,
+      $active-y: 0,
+      $hover-box-shadow: 0 6px 10px
+        color-mix(in srgb, var(--accent-primary) 10%, transparent)
+    );
+  }
+
+  &:has(.schematic-row__button--danger:hover),
+  &:has(.schematic-row__button--danger:focus-visible) {
+    border-color: var(--border-danger);
   }
 
   &__image-wrap {

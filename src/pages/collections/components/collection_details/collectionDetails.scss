@@ -417,6 +417,37 @@
     min-width: 0;
   }
 
+  &__layout-toggle {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__view-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: #ffffff;
+
+    &:hover:not(:disabled),
+    &[data-hovered],
+    &:active {
+      background: transparent;
+      border-color: var(--border-strong);
+    }
+
+    &--active {
+      background: transparent;
+      border-color: var(--accent-primary);
+
+      &:hover:not(:disabled),
+      &[data-hovered],
+      &:active {
+        background: transparent;
+        border-color: var(--accent-primary);
+      }
+    }
+  }
+
   &__page-controls {
     align-self: center;
     align-items: center;
@@ -467,6 +498,12 @@
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
     align-items: start;
+  }
+
+  &__schematics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   &__empty-state {

@@ -13,15 +13,20 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconChevronLeft,
   IconChevronRight,
+  IconLayoutGrid,
+  IconLayoutRows,
   IconPlus,
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
 import CollectionCard from "./components/card/CollectionCard";
+import CollectionRow from "./components/list/CollectionRow";
 import AddCollection from "./components/add_collection/AddCollection";
 import "./collections.scss";
 import { useCollectionsStore } from "../../store/collections_store";
 import Loading from "../../components/loading/Loading";
+
+const LAYOUT_MODE_STORAGE_KEY = "collection-layout-mode";
 
 const Collections: React.FC = () => {
   const collections = useCollectionsStore((s) => s.collections);
@@ -37,6 +42,10 @@ const Collections: React.FC = () => {
 
   const [draftSearch, setDraftSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [displayMode, setDisplayMode] = useState<"cards" | "rows">(() => {
+    const saved = localStorage.getItem(LAYOUT_MODE_STORAGE_KEY);
+    return saved === "rows" ? "rows" : "cards";
+  });
   const isCompactLayout = useMediaQuery("(max-width: 980px)");
   const [isAddDrawerOpened, { open: openAddDrawer, close: closeAddDrawer }] =
     useDisclosure(false);
@@ -49,6 +58,10 @@ const Collections: React.FC = () => {
   useEffect(() => {
     void fetchCollections({ page: collectionsPage, search: searchTerm });
   }, [collectionsPage, fetchCollections, searchTerm]);
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_MODE_STORAGE_KEY, displayMode);
+  }, [displayMode]);
 
   useEffect(() => {
     const normalized = draftSearch.trim();
@@ -122,6 +135,41 @@ const Collections: React.FC = () => {
                 </div>
 
                 <Group
+                  gap={4}
+                  wrap="nowrap"
+                  className="collections-page__layout-toggle"
+                >
+                  <ActionIcon
+                    variant="default"
+                    radius="sm"
+                    aria-label="Show collections as cards"
+                    aria-pressed={displayMode === "cards"}
+                    className={`collections-page__view-toggle-btn${
+                      displayMode === "cards"
+                        ? " collections-page__view-toggle-btn--active"
+                        : ""
+                    }`}
+                    onClick={() => setDisplayMode("cards")}
+                  >
+                    <IconLayoutGrid size={16} />
+                  </ActionIcon>
+                  <ActionIcon
+                    variant="default"
+                    radius="sm"
+                    aria-label="Show collections as rows"
+                    aria-pressed={displayMode === "rows"}
+                    className={`collections-page__view-toggle-btn${
+                      displayMode === "rows"
+                        ? " collections-page__view-toggle-btn--active"
+                        : ""
+                    }`}
+                    onClick={() => setDisplayMode("rows")}
+                  >
+                    <IconLayoutRows size={16} />
+                  </ActionIcon>
+                </Group>
+
+                <Group
                   gap="xs"
                   wrap="nowrap"
                   className="collections-page__page-controls"
@@ -162,14 +210,25 @@ const Collections: React.FC = () => {
               {isLoading ? (
                 <Loading />
               ) : collections.length > 0 ? (
-                <div className="collections-page__grid">
-                  {collections.map((collection) => (
-                    <CollectionCard
-                      key={collection._id}
-                      collection={collection}
-                    />
-                  ))}
-                </div>
+                displayMode === "cards" ? (
+                  <div className="collections-page__grid">
+                    {collections.map((collection) => (
+                      <CollectionCard
+                        key={collection._id}
+                        collection={collection}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="collections-page__list">
+                    {collections.map((collection) => (
+                      <CollectionRow
+                        key={collection._id}
+                        collection={collection}
+                      />
+                    ))}
+                  </div>
+                )
               ) : (
                 <Group
                   className="collections-page__empty-wrap"

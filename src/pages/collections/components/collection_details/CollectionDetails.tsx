@@ -22,6 +22,8 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconDeviceFloppy,
+  IconLayoutGrid,
+  IconLayoutRows,
   IconPhoto,
   IconSearch,
   IconTrash,
@@ -33,7 +35,10 @@ import SchematicRendererModal from "../../../../components/schematicRendererModa
 import customFetch from "../../../../lib/custom_fetch";
 import { popupMessage } from "../../../../lib/popupMessage";
 import { useCollectionsStore } from "../../../../store/collections_store";
+import type { Schematic } from "../../../../store/schematic_store";
 import SchematicCard from "../../../browse_schematics/components/SchematicCard";
+import EditSchematic from "../../../browse_schematics/components/EditSchematic";
+import SchematicRow from "../../../browse_schematics/components/SchematicRow";
 import ManageSchematicsModal from "./ManageSchematicsModal";
 import CreateSchematicModal from "./CreateSchematicModal";
 import { buildCollectionUpdateFormData } from "./methods/buildCollectionUpdateFormData";
@@ -41,6 +46,8 @@ import { getCollectionFormValues } from "./methods/getCollectionFormValues";
 import { validateCollectionForm } from "./methods/validateCollectionForm";
 import "./collectionDetails.scss";
 import Loading from "../../../../components/loading/Loading";
+
+const LAYOUT_MODE_STORAGE_KEY = "collection-details-layout-mode";
 
 function CollectionDetails() {
   const navigate = useNavigate();
@@ -79,11 +86,19 @@ function CollectionDetails() {
 
   const [name, setName] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [displayMode, setDisplayMode] = useState<"cards" | "rows">(() => {
+    const saved = localStorage.getItem(LAYOUT_MODE_STORAGE_KEY);
+    return saved === "rows" ? "rows" : "cards";
+  });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
   const [draftSearchValue, setDraftSearchValue] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingSchematic, setEditingSchematic] = useState<Schematic | null>(
+    null,
+  );
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [demoSchematicId, setDemoSchematicId] = useState<string | null>(null);
   const [demoSchematicName, setDemoSchematicName] = useState<string | null>(
@@ -173,6 +188,10 @@ function CollectionDetails() {
       closeSidebar();
     }
   }, [closeSidebar, isCompactLayout]);
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_MODE_STORAGE_KEY, displayMode);
+  }, [displayMode]);
 
   const collectionSchematics = activeCollection?.schematics ?? [];
 
@@ -333,6 +352,16 @@ function CollectionDetails() {
     },
     [],
   );
+
+  const handleOpenEdit = useCallback((schematic: Schematic) => {
+    setEditingSchematic(schematic);
+    setEditDrawerOpen(true);
+  }, []);
+
+  function handleCloseEditDrawer() {
+    setEditDrawerOpen(false);
+    setEditingSchematic(null);
+  }
 
   const loadSchematicArrayBuffer = useCallback(async () => {
     if (!demoSchematicId) {
@@ -504,6 +533,22 @@ function CollectionDetails() {
             collection_name: collection.name,
           }}
         />
+        <EditSchematic
+          opened={editDrawerOpen}
+          schematic={editingSchematic}
+          onClose={handleCloseEditDrawer}
+          onUpdated={() => {
+            if (!id) {
+              return;
+            }
+
+            void fetchCollection(id, {
+              page: activeCollectionPage,
+              pageSize: activeCollectionPageSize,
+              search: searchTerm,
+            });
+          }}
+        />
         <ManageSchematicsModal
           opened={addSchematicsOpen}
           onClose={() => setAddSchematicsOpen(false)}
@@ -634,6 +679,43 @@ function CollectionDetails() {
                   />
 
                   <Group
+                    gap={4}
+                    wrap="nowrap"
+                    className="collection-details__layout-toggle"
+                  >
+                    <ActionIcon
+                      size="input-sm"
+                      radius="sm"
+                      variant="default"
+                      aria-label="Show schematics as cards"
+                      aria-pressed={displayMode === "cards"}
+                      className={`collection-details__view-toggle-btn${
+                        displayMode === "cards"
+                          ? " collection-details__view-toggle-btn--active"
+                          : ""
+                      }`}
+                      onClick={() => setDisplayMode("cards")}
+                    >
+                      <IconLayoutGrid size={16} />
+                    </ActionIcon>
+                    <ActionIcon
+                      size="input-sm"
+                      radius="sm"
+                      variant="default"
+                      aria-label="Show schematics as rows"
+                      aria-pressed={displayMode === "rows"}
+                      className={`collection-details__view-toggle-btn${
+                        displayMode === "rows"
+                          ? " collection-details__view-toggle-btn--active"
+                          : ""
+                      }`}
+                      onClick={() => setDisplayMode("rows")}
+                    >
+                      <IconLayoutRows size={16} />
+                    </ActionIcon>
+                  </Group>
+
+                  <Group
                     gap="xs"
                     wrap="nowrap"
                     className="collection-details__page-controls"
@@ -672,17 +754,33 @@ function CollectionDetails() {
 
               <div className="collection-details__schematics-body">
                 {collectionSchematics.length > 0 ? (
-                  <div className="collection-details__schematics-grid">
-                    {collectionSchematics.map((schematic) => (
-                      <SchematicCard
-                        key={schematic._id}
-                        schematic={schematic}
-                        collectionId={collection._id}
-                        onRemoved={removeSchematicFromActiveCollection}
-                        onOpenDemo={handleOpenDemo}
-                      />
-                    ))}
-                  </div>
+                  displayMode === "cards" ? (
+                    <div className="collection-details__schematics-grid">
+                      {collectionSchematics.map((schematic) => (
+                        <SchematicCard
+                          key={schematic._id}
+                          schematic={schematic}
+                          collectionId={collection._id}
+                          onRemoved={removeSchematicFromActiveCollection}
+                          onOpenDemo={handleOpenDemo}
+                          onEdit={handleOpenEdit}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="collection-details__schematics-list">
+                      {collectionSchematics.map((schematic) => (
+                        <SchematicRow
+                          key={schematic._id}
+                          schematic={schematic}
+                          collectionId={collection._id}
+                          onRemoved={removeSchematicFromActiveCollection}
+                          onOpenDemo={handleOpenDemo}
+                          onEdit={handleOpenEdit}
+                        />
+                      ))}
+                    </div>
+                  )
                 ) : (
                   <div className="collection-details__empty-state">
                     <Text className="collection-details__status-text">
