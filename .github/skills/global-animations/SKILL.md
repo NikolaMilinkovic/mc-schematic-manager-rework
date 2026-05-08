@@ -22,8 +22,8 @@ Current shared animation API in `src/global/animations.scss`:
 
 - Keyframes: `page-fade-in`
 - Utility classes: `.page-fade-in`, `.page-scroll-lock`
-- Tokens: `$ui-interactive-transition-duration`, `$ui-interactive-transition-easing`, `$ui-card-hover-transition-duration`, `$ui-card-hover-transition-easing`
-- Mixins: `interactive-hover-transition($duration, $easing)`, `interactive-card-hover-transition($duration, $easing)`
+- Tokens: `$ui-interactive-transition-duration`, `$ui-interactive-transition-easing`, `$ui-card-hover-transition-duration`, `$ui-card-hover-transition-easing`, `$ui-image-reveal-transition-duration`, `$ui-image-reveal-transition-easing`
+- Mixins: `interactive-hover-transition($duration, $easing)`, `interactive-card-hover-transition($duration, $easing)`, `image-fade-reveal($loaded-opacity, $duration, $easing)`
 
 Rules:
 

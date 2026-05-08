@@ -26,6 +26,8 @@ $ui-interactive-transition-duration: 170ms;
 $ui-interactive-transition-easing: ease;
 $ui-card-hover-transition-duration: 220ms;
 $ui-card-hover-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
+$ui-image-reveal-transition-duration: 400ms;
+$ui-image-reveal-transition-easing: ease;
 
 @mixin interactive-hover-transition(
   $duration: $ui-interactive-transition-duration,
@@ -99,6 +101,23 @@ $ui-card-hover-transition-easing: cubic-bezier(0.22, 1, 0.36, 1);
     &:active {
       transform: none;
     }
+  }
+}
+
+@mixin image-fade-reveal(
+  $loaded-opacity: 1,
+  $duration: $ui-image-reveal-transition-duration,
+  $easing: $ui-image-reveal-transition-easing
+) {
+  opacity: 0;
+  transition: opacity $duration $easing;
+
+  &--loaded {
+    opacity: $loaded-opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 

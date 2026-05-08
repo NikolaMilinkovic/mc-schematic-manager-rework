@@ -38,16 +38,7 @@
 
   &__image {
     @include card.card-image();
-    opacity: 0;
-    transition: opacity 400ms ease;
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
-    }
-
-    &--loaded {
-      opacity: 1;
-    }
+    @include animations.image-fade-reveal();
   }
 
   &__image-placeholder {

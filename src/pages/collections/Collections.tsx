@@ -260,7 +260,7 @@ const Collections: React.FC = () => {
         opened={isAddDrawerOpened}
         onClose={closeAddDrawer}
         position="left"
-        size={360}
+        size={isCompactLayout ? "100%" : 360}
         withCloseButton={false}
         classNames={{
           content: "collections-page__drawer",

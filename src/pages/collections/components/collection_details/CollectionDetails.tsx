@@ -678,77 +678,79 @@ function CollectionDetails() {
                     }}
                   />
 
-                  <Group
-                    gap={4}
-                    wrap="nowrap"
-                    className="collection-details__layout-toggle"
-                  >
-                    <ActionIcon
-                      size="input-sm"
-                      radius="sm"
-                      variant="default"
-                      aria-label="Show schematics as cards"
-                      aria-pressed={displayMode === "cards"}
-                      className={`collection-details__view-toggle-btn${
-                        displayMode === "cards"
-                          ? " collection-details__view-toggle-btn--active"
-                          : ""
-                      }`}
-                      onClick={() => setDisplayMode("cards")}
+                  <div className="collection-details__toolbar-trailing">
+                    <Group
+                      gap={4}
+                      wrap="nowrap"
+                      className="collection-details__layout-toggle"
                     >
-                      <IconLayoutGrid size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      size="input-sm"
-                      radius="sm"
-                      variant="default"
-                      aria-label="Show schematics as rows"
-                      aria-pressed={displayMode === "rows"}
-                      className={`collection-details__view-toggle-btn${
-                        displayMode === "rows"
-                          ? " collection-details__view-toggle-btn--active"
-                          : ""
-                      }`}
-                      onClick={() => setDisplayMode("rows")}
-                    >
-                      <IconLayoutRows size={16} />
-                    </ActionIcon>
-                  </Group>
+                      <ActionIcon
+                        size="input-sm"
+                        radius="sm"
+                        variant="default"
+                        aria-label="Show schematics as cards"
+                        aria-pressed={displayMode === "cards"}
+                        className={`collection-details__view-toggle-btn${
+                          displayMode === "cards"
+                            ? " collection-details__view-toggle-btn--active"
+                            : ""
+                        }`}
+                        onClick={() => setDisplayMode("cards")}
+                      >
+                        <IconLayoutGrid size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="input-sm"
+                        radius="sm"
+                        variant="default"
+                        aria-label="Show schematics as rows"
+                        aria-pressed={displayMode === "rows"}
+                        className={`collection-details__view-toggle-btn${
+                          displayMode === "rows"
+                            ? " collection-details__view-toggle-btn--active"
+                            : ""
+                        }`}
+                        onClick={() => setDisplayMode("rows")}
+                      >
+                        <IconLayoutRows size={16} />
+                      </ActionIcon>
+                    </Group>
 
-                  <Group
-                    gap="xs"
-                    wrap="nowrap"
-                    className="collection-details__page-controls"
-                  >
-                    <ActionIcon
-                      size="input-sm"
-                      radius="sm"
-                      variant="default"
-                      aria-label="Previous page"
-                      disabled={activeCollectionPage <= 1 || isDetailLoading}
-                      onClick={() =>
-                        setActiveCollectionPage(activeCollectionPage - 1)
-                      }
-                      className="collection-details__page-control"
+                    <Group
+                      gap="xs"
+                      wrap="nowrap"
+                      className="collection-details__page-controls"
                     >
-                      <IconChevronLeft size={16} />
-                    </ActionIcon>
-                    <ActionIcon
-                      size="input-sm"
-                      radius="sm"
-                      variant="default"
-                      aria-label="Next page"
-                      disabled={
-                        activeCollectionPage >= totalPages || isDetailLoading
-                      }
-                      onClick={() =>
-                        setActiveCollectionPage(activeCollectionPage + 1)
-                      }
-                      className="collection-details__page-control"
-                    >
-                      <IconChevronRight size={16} />
-                    </ActionIcon>
-                  </Group>
+                      <ActionIcon
+                        size="input-sm"
+                        radius="sm"
+                        variant="default"
+                        aria-label="Previous page"
+                        disabled={activeCollectionPage <= 1 || isDetailLoading}
+                        onClick={() =>
+                          setActiveCollectionPage(activeCollectionPage - 1)
+                        }
+                        className="collection-details__page-control"
+                      >
+                        <IconChevronLeft size={16} />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="input-sm"
+                        radius="sm"
+                        variant="default"
+                        aria-label="Next page"
+                        disabled={
+                          activeCollectionPage >= totalPages || isDetailLoading
+                        }
+                        onClick={() =>
+                          setActiveCollectionPage(activeCollectionPage + 1)
+                        }
+                        className="collection-details__page-control"
+                      >
+                        <IconChevronRight size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </div>
                 </div>
               </div>
 

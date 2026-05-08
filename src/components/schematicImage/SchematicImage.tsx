@@ -25,8 +25,10 @@ function SchematicImage({
   ...imgProps
 }: SchematicImageProps) {
   const [resolvedUrl, setResolvedUrl] = useState(imageUrl);
+  const [renderedUrl, setRenderedUrl] = useState<string | null>(null);
   const isRefreshingRef = useRef(false);
   const didErrorRefreshRef = useRef(false);
+  const preloadAttemptRef = useRef(0);
 
   const refreshUrl = useCallback(async () => {
     if (!schematicId || isRefreshingRef.current) {
@@ -55,8 +57,52 @@ function SchematicImage({
 
   useEffect(() => {
     setResolvedUrl(imageUrl);
+    setRenderedUrl(null);
     didErrorRefreshRef.current = false;
   }, [imageUrl]);
+
+  useEffect(() => {
+    if (!resolvedUrl) {
+      setRenderedUrl(null);
+      return;
+    }
+
+    let isCancelled = false;
+    const preloadAttempt = ++preloadAttemptRef.current;
+    const preloadedImage = new Image();
+
+    const finish = () => {
+      if (isCancelled || preloadAttempt !== preloadAttemptRef.current) {
+        return;
+      }
+
+      setRenderedUrl(resolvedUrl);
+    };
+
+    preloadedImage.src = resolvedUrl;
+
+    if (typeof preloadedImage.decode === "function") {
+      void preloadedImage
+        .decode()
+        .then(finish)
+        .catch(() => {
+          if (preloadedImage.complete) {
+            finish();
+            return;
+          }
+
+          preloadedImage.addEventListener("load", finish, { once: true });
+          preloadedImage.addEventListener("error", finish, { once: true });
+        });
+    } else {
+      preloadedImage.addEventListener("load", finish, { once: true });
+      preloadedImage.addEventListener("error", finish, { once: true });
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [resolvedUrl]);
 
   useEffect(() => {
     if (!schematicId || !resolvedUrl) {
@@ -81,7 +127,9 @@ function SchematicImage({
     onError?.(event);
   };
 
-  return <img {...imgProps} src={resolvedUrl} onError={handleError} />;
+  return (
+    <img {...imgProps} src={renderedUrl ?? undefined} onError={handleError} />
+  );
 }
 
 export default SchematicImage;

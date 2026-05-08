@@ -41,27 +41,41 @@
 
   &__blurhash {
     @include card.card-blurhash();
+    opacity: 1;
+    transition: opacity 220ms ease;
+
+    &--hidden {
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
   &__image {
     @include card.card-image();
+    @include animations.image-fade-reveal(var(--schematic-image-opacity));
     width: 100%;
     display: block;
-    opacity: var(--schematic-image-opacity);
     filter: brightness(var(--schematic-image-brightness))
       saturate(var(--schematic-image-saturation));
     transition:
-      filter 180ms ease,
-      opacity 180ms ease;
+      opacity 400ms ease,
+      filter 180ms ease;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
-  &--clickable:hover &__image {
+  &--clickable:hover &__image--loaded {
     opacity: calc(var(--schematic-image-opacity) + 0.04);
     filter: brightness(calc(var(--schematic-image-brightness) + 0.1))
       saturate(calc(var(--schematic-image-saturation) + 0.07));
   }
 
-  &--clickable:active &__image {
+  &--clickable:active &__image--loaded {
     opacity: calc(var(--schematic-image-opacity) - 0.03);
     filter: brightness(calc(var(--schematic-image-brightness) - 0.04))
       saturate(var(--schematic-image-saturation));

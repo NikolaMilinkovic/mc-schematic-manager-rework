@@ -412,6 +412,13 @@
     align-items: center;
   }
 
+  &__toolbar-trailing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
   &__search-field {
     flex: 1;
     min-width: 0;
@@ -595,15 +602,16 @@
   }
 
   @media (max-width: 720px) {
-    height: auto;
-    min-height: calc(100vh - 66px);
-    overflow-y: auto;
+    height: calc(100vh - 66px);
+    height: calc(100dvh - 66px);
+    min-height: 0;
+    overflow: hidden;
 
     --page-gap: 12px;
 
     &__content {
-      height: auto;
-      min-height: 100%;
+      height: 100%;
+      min-height: 0;
     }
 
     &__drawer {
@@ -611,10 +619,55 @@
     }
 
     &__form-actions,
-    &__schematics-toolbar,
     &__schematics-actions {
       flex-direction: column;
       align-items: stretch;
+    }
+
+    &__schematics-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "actions actions"
+        "search trailing";
+      align-items: center;
+      gap: 8px;
+    }
+
+    &__schematics-actions {
+      grid-area: actions;
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 2px;
+    }
+
+    &__schematics-action {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    &__search-field {
+      grid-area: search;
+      width: 100%;
+      flex: initial;
+      min-width: 0;
+    }
+
+    &__toolbar-trailing {
+      grid-area: trailing;
+      flex: initial;
+      align-self: center;
+      justify-self: end;
+    }
+
+    &__layout-toggle,
+    &__page-controls {
+      margin: 0;
     }
 
     &__editor-heading {
@@ -629,17 +682,24 @@
     }
 
     &__layout {
-      min-height: initial;
+      height: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
       padding: var(--page-gap);
     }
 
-    &__schematics-card,
-    &__schematics-body {
-      min-height: initial;
+    &__schematics-card {
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
     }
 
     &__schematics-body {
-      overflow: visible;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
       padding-right: 0;
     }
 
@@ -648,8 +708,7 @@
     }
 
     &__form-actions > button,
-    &__schematics-toolbar > div,
-    &__schematics-toolbar > .mantine-TextInput-root {
+    &__form-actions > .mantine-Button-root {
       width: 100%;
     }
 
